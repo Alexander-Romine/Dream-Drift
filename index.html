@@ -1,0 +1,1748 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dreamdrift</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0c0914;
+    --bg-card:   rgba(22, 16, 36, 0.78);
+    --bg-glass:  rgba(255, 255, 255, 0.03);
+    --bdr:       rgba(215, 185, 255, 0.12);
+    --bdr-focus: rgba(96, 121, 199, 0.5);
+    
+    --fg:        #f4efe6;
+    --dim:       #9e92bc;
+    --acc:       #6079c7;
+    --acc-rgb:   96, 121, 199;
+    --acd:       #344778;
+    --hov:       #7793e8;
+    --wine:      #778bd1;
+    
+    --inbg:      #181028;
+    --font-sans: 'Plus Jakarta Sans', sans-serif;
+    --font-serif: 'Instrument Serif', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    
+    --radius:    6px;
+    --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; scroll-behavior: smooth; }
+
+  body {
+    background: radial-gradient(circle at 15% -10%, #2b184e 0%, transparent 45%),
+                radial-gradient(circle at 85% 105%, #1f0c2e 0%, transparent 50%), var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    padding: 24px 20px 60px;
+    letter-spacing: -0.01em;
+  }
+
+  .wrap { max-width: 1400px; margin: 0 auto; }
+
+  /* ── Header ── */
+  header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; margin-bottom: 24px;
+    border-bottom: 1px solid var(--bdr); padding-bottom: 16px;
+  }
+  h1 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: 3.2rem;
+    line-height: 0.95;
+    margin: 0;
+    letter-spacing: 0.02em;
+    background: linear-gradient(135deg, #f4efe6 20%, #6079c7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header-actions {
+    display: flex; gap: 10px; align-items: center;
+  }
+
+  /* ── Layout Grid ── */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 1024px) {
+    .panels { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--bdr);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(96,121,199,0.3), transparent);
+  }
+
+  h2 {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 0.7rem;
+    color: var(--acc);
+    margin: 20px 0 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h2::after {
+    content: ''; flex: 1; height: 1px; background: var(--bdr);
+  }
+  h2:first-child { margin-top: 0; }
+
+  /* ── Collapsible Accordion Dropdowns ── */
+  .accordion {
+    border: 1px solid rgba(96,121,199,0.3);
+    background: rgba(96,121,199,0.03);
+    border-radius: var(--radius);
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: var(--transition);
+  }
+  .accordion:hover {
+    border-color: rgba(96,121,199,0.6);
+  }
+  .acc-header {
+    padding: 10px 14px;
+    background: rgba(96,121,199,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--acc);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .acc-header span.arrow {
+    transition: transform 0.25s ease;
+    font-size: 0.8rem;
+  }
+  .accordion.open .acc-header span.arrow {
+    transform: rotate(180deg);
+  }
+  .acc-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease;
+    padding: 0 14px;
+  }
+  .accordion.open .acc-body {
+    max-height: 1400px;
+    padding: 14px;
+  }
+
+  /* ── Drop Zones ── */
+  .drop {
+    border: 1px dashed var(--bdr);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--dim);
+    background: var(--bg-glass);
+    transition: var(--transition);
+    margin-bottom: 10px;
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+  }
+  .drop:hover, .drop.filled {
+    border-color: var(--acc);
+    color: var(--fg);
+    background: rgba(96,121,199,0.03);
+  }
+  .drop.over {
+    background: rgba(96,121,199,0.08);
+    border-color: var(--acc);
+    color: var(--acc);
+  }
+  .drop .fn {
+    color: var(--acc);
+    font-size: 0.68rem;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Queue list container */
+  .queue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 160px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+  }
+  .queue-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--inbg);
+    border: 1px solid var(--bdr);
+    padding: 6px 10px;
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--fg);
+  }
+  .queue-item .qname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%; }
+  .queue-item .qrem { color: var(--wine); cursor: pointer; font-weight: 700; padding: 0 4px; }
+  .queue-item .qrem:hover { color: #ff6b7b; }
+
+  /* ── Fields & Sliders ── */
+  .field { margin-bottom: 12px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--font-mono); font-size: 0.71rem; color: var(--dim);
+    margin-bottom: 5px; cursor: help; user-select: none;
+  }
+  .val { color: var(--acc); font-size: 0.71rem; font-weight: 500; }
+
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; height: 4px;
+    background: rgba(215,185,255,0.12); outline: none; cursor: pointer;
+    border-radius: 2px; transition: var(--transition);
+  }
+  input[type=range]:hover { background: rgba(215,185,255,0.22); }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--acc); cursor: pointer;
+    box-shadow: 0 0 10px rgba(var(--acc-rgb), 0.5);
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); background: var(--hov); }
+
+  select {
+    width: 100%; background: var(--inbg); color: var(--fg);
+    border: 1px solid var(--bdr); border-radius: var(--radius);
+    font-family: var(--font-mono); font-size: 0.72rem;
+    padding: 9px 12px; outline: none; cursor: pointer;
+    transition: var(--transition);
+  }
+  select:focus { border-color: var(--acc); box-shadow: 0 0 0 2px rgba(var(--acc-rgb), 0.15); }
+
+  /* ── Chips ── */
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .chip {
+    font-family: var(--font-mono); font-size: 0.68rem; color: var(--dim);
+    background: var(--bg-glass); border: 1px solid var(--bdr); border-radius: var(--radius);
+    padding: 6px 10px; cursor: pointer; transition: var(--transition);
+  }
+  .chip.on { color: var(--bg); background: var(--acc); border-color: var(--acc); font-weight: 600; box-shadow: 0 0 12px rgba(var(--acc-rgb), 0.3); }
+  .chip:hover:not(.on) { border-color: var(--acd); color: var(--fg); background: rgba(255,255,255,0.05); }
+  .chip.f1 { flex: 1; text-align: center; }
+
+  /* ── Canvas & YouTube Style Player Wrapper ── */
+  .cvwrap {
+    width: 100%; background: #000; border: 1px solid var(--bdr); border-radius: var(--radius);
+    display: flex; justify-content: center; align-items: center;
+    overflow: hidden; position: relative; min-height: 220px;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+  }
+  canvas { width: 100%; height: auto; display: block; max-height: 480px; object-fit: contain; }
+
+  /* YouTube style control bar */
+  .yt-controls {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+    padding: 18px 16px 10px; display: flex; flex-direction: column; gap: 6px;
+    opacity: 0; transition: opacity 0.25s ease;
+  }
+  .cvwrap:hover .yt-controls, .yt-controls.active { opacity: 1; }
+
+  /* Timeline Scrub Bar */
+  .yt-timeline-container {
+    position: relative; width: 100%; height: 16px; display: flex; align-items: center; cursor: pointer;
+  }
+  .yt-timeline-track {
+    position: relative; width: 100%; height: 4px; background: rgba(255,255,255,0.25); border-radius: 2px; transition: height 0.15s ease;
+  }
+  .yt-timeline-container:hover .yt-timeline-track { height: 6px; }
+  .yt-timeline-loaded {
+    position: absolute; top: 0; left: 0; height: 100%; background: rgba(255,255,255,0.4); border-radius: 2px; width: 100%;
+  }
+  .yt-timeline-progress {
+    position: absolute; top: 0; left: 0; height: 100%; background: #ff0000; border-radius: 2px; width: 0%;
+  }
+  .yt-timeline-scrubber-dot {
+    position: absolute; top: 50%; left: 0%; width: 12px; height: 12px; background: #ff0000; border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0); transition: transform 0.15s ease; pointer-events: none; box-shadow: 0 0 6px rgba(0,0,0,0.6);
+  }
+  .yt-timeline-container:hover .yt-timeline-scrubber-dot,
+  .yt-timeline-container.active .yt-timeline-scrubber-dot {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* Bottom Controls Row */
+  .yt-bottom-row {
+    display: flex; justify-content: space-between; align-items: center; margin-top: 2px;
+  }
+  .yt-left-controls, .yt-right-controls {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .yt-btn {
+    background: none; border: none; color: #fff; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;
+    opacity: 0.9; transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .yt-btn:hover { opacity: 1; transform: scale(1.1); }
+  .yt-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+  .yt-time-display {
+    font-family: var(--font-mono); font-size: 0.72rem; color: #fff; user-select: none;
+  }
+
+  /* Volume Slider (Shorter) */
+  .yt-vol-wrap {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .yt-vol-slider {
+    -webkit-appearance: none; width: 64px; height: 3px; background: rgba(255,255,255,0.3); border-radius: 2px; outline: none; cursor: pointer;
+  }
+  .yt-vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #fff; cursor: pointer;
+  }
+
+  .qgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .qgrid .ql { font-family: var(--font-mono); font-size: 0.68rem; color: var(--dim); display: block; margin-bottom: 4px; }
+
+  /* Transport */
+  .tport { display: flex; gap: 8px; margin-top: 16px; }
+  .btn {
+    font-family: var(--font-mono); font-size: 0.73rem; letter-spacing: 0.5px;
+    background: var(--bg-glass); color: var(--fg); border: 1px solid var(--bdr);
+    border-radius: var(--radius); padding: 10px 14px; cursor: pointer; flex: 1;
+    transition: var(--transition); text-transform: uppercase;
+  }
+  .btn:hover:not(:disabled) { border-color: var(--acc); color: var(--acc); background: rgba(96,121,199,0.05); }
+  .btn.pri { background: var(--acc); color: var(--bg); border-color: var(--acc); font-weight: 700; box-shadow: 0 4px 20px rgba(var(--acc-rgb), 0.35); }
+  .btn.pri:hover:not(:disabled) { background: var(--hov); transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .status { font-family: var(--font-mono); font-size: 0.7rem; color: var(--dim); margin-top: 10px; min-height: 1.3em; }
+  .status.act  { color: var(--wine); }
+  .status.done { color: var(--acc); }
+  
+  .dl {
+    font-family: var(--font-mono); font-size: 0.74rem;
+    color: var(--bg); background: var(--acc); text-align: center;
+    border-radius: var(--radius); padding: 10px 14px; margin-top: 8px;
+    text-decoration: none; font-weight: 700; display: block;
+    box-shadow: 0 4px 20px rgba(var(--acc-rgb), 0.35);
+    transition: var(--transition);
+  }
+  .dl:hover { background: var(--hov); transform: translateY(-1px); }
+
+  .hint { font-family: var(--font-mono); font-size: 0.67rem; color: var(--dim); margin: 6px 0 10px; display: none; }
+  .hint span { color: var(--acc); }
+
+  /* Fullscreen Mode Styling */
+  .cvwrap:fullscreen {
+    background: #000; width: 100vw; height: 100vh; border: none; border-radius: 0;
+  }
+  .cvwrap:fullscreen canvas {
+    max-height: 100vh; width: auto; height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(96,121,199,0.3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--acc); }
+</style>
+<style>
+/* Snapshot-inspired minimalist interface */
+:root{--bg:#030405;--bg-card:rgba(8,10,14,.88);--bg-glass:rgba(255,255,255,.035);--bdr:rgba(255,255,255,.11);--bdr-focus:rgba(255,255,255,.45);--fg:#f5f5f4;--dim:#8b8e99;--acc:#f4f4f3;--acc-rgb:244,244,243;--acd:#d9d9d7;--hov:#fff;--wine:#aab7ff;--inbg:#0b0d12;--font-sans:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--font-serif:var(--font-sans);--font-mono:"SFMono-Regular",Consolas,monospace;--radius:18px}
+html{background:#030405}body{background:radial-gradient(ellipse 70% 34% at 50% 100%,rgba(58,64,94,.42),transparent 70%),radial-gradient(ellipse 35% 20% at 2% 80%,rgba(62,68,94,.28),transparent 70%),#030405;color:var(--fg);padding:28px 28px 70px;letter-spacing:-.02em}body:before{content:"";position:fixed;inset:auto 0 0;height:32vh;pointer-events:none;background:radial-gradient(ellipse at 20% 100%,rgba(160,169,205,.16),transparent 48%),radial-gradient(ellipse at 80% 105%,rgba(123,132,170,.13),transparent 48%);filter:blur(25px)}.wrap{max-width:1380px;position:relative;z-index:1}header{align-items:center;border:0;padding:0 0 34px;margin-bottom:0}header>div:first-child{display:flex;align-items:center;gap:12px}header>div:first-child:before{content:"∿";display:grid;place-items:center;width:34px;height:24px;border:2px solid #fff;border-radius:50%;font-size:22px;line-height:1;font-weight:500}h1{font-family:var(--font-sans);font-size:1.25rem;font-weight:700;line-height:1;letter-spacing:-.04em;background:none;-webkit-text-fill-color:currentColor}header .chip{border-radius:999px;padding:10px 17px}.panels{gap:18px}.card{background:linear-gradient(145deg,rgba(14,16,22,.94),rgba(5,6,9,.92));border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:26px;box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden}.card:before{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.24),transparent)}h2{margin:25px 0 12px;color:#8f929c;font-size:.67rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.card h2:first-child{margin-top:0}.drop{min-height:88px;border:1px dashed rgba(255,255,255,.2);border-radius:14px;background:rgba(255,255,255,.025);color:#a1a4ad;transition:.2s}.drop:hover,.drop.drag{border-color:#fff;background:rgba(255,255,255,.065);color:#fff;transform:none}.chip{border:1px solid rgba(255,255,255,.13);border-radius:999px;background:rgba(255,255,255,.035);color:#aeb0b7;padding:8px 13px;font-size:.72rem;transition:.2s}.chip:hover{border-color:rgba(255,255,255,.35);color:#fff;background:rgba(255,255,255,.08)}.chip.on,.chip:focus{background:#f1f1ef;color:#090a0d;border-color:#f1f1ef;box-shadow:none}.accordion{border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.02);overflow:hidden}.acc-header{padding:15px 16px;color:#e8e8e6;font-size:.72rem;letter-spacing:.04em}.acc-body{padding:2px 16px 16px}.field{margin-top:15px}.field label{font-size:.7rem;color:#a4a7af}.val{color:#f4f4f2;font-family:var(--font-mono)}input[type=range]{accent-color:#f4f4f2}input[type=range]::-webkit-slider-runnable-track{height:3px;background:#282b31;border-radius:4px}input[type=range]::-webkit-slider-thumb{margin-top:-5px;width:13px;height:13px;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.08)}select{background:#0a0c10;border:1px solid rgba(255,255,255,.13);border-radius:11px;color:#e7e7e5;padding:11px 36px 11px 12px}.cvwrap{border-radius:16px;border:1px solid rgba(255,255,255,.12);background:#000;box-shadow:0 22px 55px rgba(0,0,0,.55);overflow:hidden}.qgrid{gap:12px}.ql{color:#777b85;text-transform:uppercase;letter-spacing:.1em}.btn{border-radius:999px;background:transparent;border:1px solid rgba(255,255,255,.18);color:#f5f5f3;padding:12px 18px;font-size:.75rem}.btn:hover:not(:disabled){background:rgba(255,255,255,.08);border-color:#fff;transform:translateY(-1px)}.btn.pri{background:#f2f2f0!important;border-color:#f2f2f0!important;color:#08090b}.btn:disabled{opacity:.28}.status{border:0;background:rgba(255,255,255,.025);border-radius:10px;color:#777b84}.dl{border-radius:999px;background:#f2f2f0;color:#08090b}.queue-item{border-radius:12px;background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.09)}
+@media(max-width:1024px){body{padding:20px 16px 50px}.panels{grid-template-columns:1fr}.card{padding:20px}}@media(max-width:560px){header{padding-bottom:22px}.card{border-radius:17px;padding:16px}.qgrid{grid-template-columns:1fr}.tport{flex-direction:column}.btn{width:100%}}
+</style><style>
+body{background:#020304!important;--mx:0px;--my:0px}.wrap{position:relative;z-index:2}header>div:first-child:before{display:none}.brand-mark{width:38px;height:28px;overflow:visible;fill:none;stroke:#f5f5f3;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.brand-mark .echo{stroke:#7d849d;stroke-width:1.4;opacity:.8}.weather{position:fixed;z-index:0;inset:0;overflow:hidden;pointer-events:none;background:linear-gradient(180deg,#020304 0%,#05070b 50%,#0b0e17 100%)}.weather:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at calc(50% + var(--mx)) calc(44% + var(--my)),rgba(100,112,145,.13),transparent 32%),linear-gradient(180deg,transparent 55%,rgba(85,94,124,.12));transition:background .15s linear}.cloud{position:absolute;width:68vw;height:24vw;min-height:180px;border-radius:50%;filter:blur(42px);opacity:.25;will-change:transform}.cloud:before,.cloud:after{content:"";position:absolute;border-radius:50%;background:inherit}.cloud:before{width:58%;height:92%;left:5%;top:15%}.cloud:after{width:64%;height:105%;right:0;top:0}.cloud-a{left:-18vw;top:43%;background:#4c5369;transform:translate3d(calc(var(--mx) * .18),calc(var(--my) * .12),0);animation:cloudDriftA 24s ease-in-out infinite alternate}.cloud-b{right:-18vw;top:58%;background:#343b50;transform:translate3d(calc(var(--mx) * -.12),calc(var(--my) * .08),0);animation:cloudDriftB 30s ease-in-out infinite alternate}.rain{position:absolute;inset:0;opacity:.34;transform:translate3d(calc(var(--mx) * -.025),calc(var(--my) * -.02),0)}.rain i{position:absolute;top:-18vh;width:1px;height:clamp(22px,5vh,54px);background:linear-gradient(transparent,rgba(188,200,226,.62));transform:rotate(9deg);animation:rainfall var(--speed) linear var(--delay) infinite}.card{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:linear-gradient(145deg,rgba(13,15,20,.88),rgba(4,5,8,.86))}@keyframes rainfall{to{transform:translate3d(-9vw,125vh,0) rotate(9deg)}}@keyframes cloudDriftA{from{margin-left:-3vw}to{margin-left:9vw}}@keyframes cloudDriftB{from{margin-right:-2vw}to{margin-right:8vw}}@media(prefers-reduced-motion:reduce){.cloud,.rain i{animation:none}.rain{display:none}}
+</style><style>
+:root{--bdr-focus:rgba(96,121,199,.58);--acc:#6079c7;--acc-rgb:96,121,199;--acd:#344778;--hov:#7793e8;--wine:#778bd1}.weather{background:linear-gradient(180deg,#02040a 0%,#050814 48%,#080c18 100%)}.weather:after{background:radial-gradient(circle at calc(50% + var(--mx)) calc(40% + var(--my)),rgba(77,99,161,.13),transparent 30%),linear-gradient(180deg,transparent 52%,rgba(37,53,94,.16))}.stars{position:absolute;inset:0 0 32%;opacity:.38;transform:translate3d(calc(var(--mx) * .04),calc(var(--my) * .025),0)}.stars i{position:absolute;width:1px;height:1px;border-radius:50%;background:#cbd6fa;box-shadow:0 0 5px rgba(166,185,238,.45);animation:starPulse var(--twinkle) ease-in-out var(--delay) infinite alternate}.cloud{filter:blur(16px);opacity:.34;background:#333c57;border-radius:48% 52% 44% 56% / 62% 58% 42% 38%;box-shadow:0 14px 55px rgba(38,49,83,.35),inset 0 18px 40px rgba(102,117,158,.09)}.cloud:before{background:#424c69;border-radius:50% 46% 52% 48%;width:55%;height:86%;left:9%;top:-18%}.cloud:after{background:#2a324a;border-radius:46% 54% 45% 55%;width:60%;height:92%;right:1%;top:4%}.cloud-a{top:48%;opacity:.4}.cloud-b{top:68%;opacity:.31;filter:blur(20px)}.card{border-color:rgba(93,113,174,.16)}.chip.on,.chip:focus,.btn.pri,.dl{background:#dfe6fa!important;border-color:#dfe6fa!important;color:#080b14}.brand-mark .echo{stroke:#6079c7}@keyframes starPulse{from{opacity:.25}to{opacity:.85}}@media(prefers-reduced-motion:reduce){.stars i{animation:none}}
+</style><style>
+/* Photographic cloud banks: recognizable billows, layered for slow parallax. */
+.weather{background:linear-gradient(180deg,#010204 0%,#03050a 49%,#090d18 100%)}
+.cloud,.cloud:before,.cloud:after{border-radius:0;background-color:transparent;box-shadow:none}.cloud:before,.cloud:after{display:none}.cloud{left:-8vw;right:auto;width:116vw;min-height:0;filter:none;background-repeat:repeat-x;background-size:cover;background-position:center;will-change:transform,background-position;mask-image:linear-gradient(to bottom,transparent 0%,#000 20%,#000 79%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 20%,#000 79%,transparent 100%)}
+.cloud-a{top:40%;height:45vh;opacity:.29;background-image:linear-gradient(180deg,rgba(3,5,10,.2),rgba(13,18,32,.12)),url('https://images.unsplash.com/photo-1560928863-e140ee0fc733?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=78&w=1800');background-size:cover;animation:photoCloudA 52s ease-in-out infinite alternate;mix-blend-mode:screen}
+.cloud-b{top:60%;height:43vh;opacity:.33;filter:none;background-image:linear-gradient(180deg,rgba(2,4,9,.28),rgba(22,29,49,.05)),url('https://images.unsplash.com/photo-1599806112354-67f8b5425a06?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=76&w=1800');background-size:cover;animation:photoCloudB 64s ease-in-out infinite alternate;mix-blend-mode:screen}
+.cloud-c{top:73%;height:32vh;opacity:.2;background-image:url('https://images.unsplash.com/photo-1534088568595-a066f410bcda?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=70&w=1800');background-size:cover;animation:photoCloudC 44s ease-in-out infinite alternate;mix-blend-mode:screen;filter:blur(2px)}
+@keyframes photoCloudA{0%{transform:translate3d(calc(-2vw + var(--mx)*.16),calc(var(--my)*.08),0) scale(1.04);background-position:44% 45%}100%{transform:translate3d(calc(4vw + var(--mx)*.16),calc(-1.2vh + var(--my)*.08),0) scale(1.08);background-position:58% 52%}}
+@keyframes photoCloudB{0%{transform:translate3d(calc(3vw + var(--mx)*-.1),calc(var(--my)*.06),0) scale(1.08);background-position:55% 30%}100%{transform:translate3d(calc(-4vw + var(--mx)*-.1),calc(-1vh + var(--my)*.06),0) scale(1.04);background-position:42% 40%}}
+@keyframes photoCloudC{0%{transform:translate3d(-4vw,0,0) scale(1.07)}100%{transform:translate3d(5vw,-1.5vh,0) scale(1.12)}}
+@media(max-width:700px){.cloud{width:145vw;left:-22vw}.cloud-a{top:45%;height:38vh}.cloud-b{top:66%;height:34vh}.cloud-c{top:79%;height:25vh}}
+@media(prefers-reduced-motion:reduce){.cloud{animation:none}}
+</style><style>
+/* Dreamdrift midnight glass control system */
+header{padding:2px 4px 30px}.panels{gap:22px;align-items:start}.card{background:linear-gradient(155deg,rgba(5,8,16,.91),rgba(2,4,9,.84))!important;border:1px solid rgba(128,151,220,.14)!important;border-radius:24px;padding:28px;box-shadow:0 32px 90px rgba(0,0,0,.62),inset 0 1px 0 rgba(215,225,255,.055),inset 0 0 60px rgba(31,48,91,.045);backdrop-filter:blur(30px) saturate(120%);-webkit-backdrop-filter:blur(30px) saturate(120%)}.card:before{height:1px;background:linear-gradient(90deg,transparent 5%,rgba(145,167,231,.23) 50%,transparent 95%)}h2{display:flex;align-items:center;gap:12px;margin:30px 0 13px;color:#818aa2;font-family:var(--font-sans);font-size:.65rem;font-weight:650;letter-spacing:.14em}h2:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,rgba(111,134,202,.16),transparent)}.card h2:first-child{margin-top:0}.drop{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:98px;padding:20px 22px;border:1px dashed rgba(123,146,212,.25);border-radius:16px;background:linear-gradient(135deg,rgba(52,70,119,.09),rgba(8,12,23,.22));color:#929bb2;font-size:.75rem;text-align:left}.drop:before{content:"+";position:absolute;right:18px;top:50%;translate:0 -50%;display:grid;place-items:center;width:30px;height:30px;border:1px solid rgba(137,159,222,.2);border-radius:50%;color:#8999c8;font-size:1rem}.drop:hover,.drop.filled,.drop.over{border-color:rgba(129,157,238,.62);background:linear-gradient(135deg,rgba(62,84,148,.16),rgba(9,14,27,.34));color:#e3e9fb;box-shadow:inset 0 0 34px rgba(55,81,151,.08)}.drop .fn{margin-top:6px;color:#bac9f3}.queue-list{display:grid;gap:7px;margin-top:9px}.queue-item{padding:11px 13px;border:1px solid rgba(113,137,202,.13);border-radius:12px;background:rgba(10,15,28,.58);color:#adb6cd}.queue-item.active{border-color:rgba(125,155,238,.42);background:rgba(32,47,88,.34);color:#ecf1ff}.queue-item .qrem{color:#7e8fbe}.queue-item .qrem:hover{color:#c8d5fb}.chips{gap:7px}.chip{min-height:34px;border:1px solid rgba(119,141,201,.17);background:rgba(8,12,23,.66);color:#929bb0;padding:8px 14px}.chip:hover{border-color:rgba(124,153,234,.4);background:rgba(38,55,99,.28);color:#e1e9ff}.chip.on,.chip:focus{border-color:rgba(126,155,237,.5);background:linear-gradient(180deg,rgba(65,89,154,.58),rgba(39,57,105,.58))!important;color:#edf2ff!important;box-shadow:inset 0 1px 0 rgba(214,226,255,.12),0 6px 20px rgba(12,25,60,.22)}.accordion{margin-top:14px;border:1px solid rgba(111,136,202,.14);border-radius:15px;background:rgba(4,7,14,.56)}.accordion:hover{border-color:rgba(117,145,220,.23)}.acc-header{padding:16px 17px;color:#c3cce2;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em}.acc-header .arrow{display:grid;place-items:center;width:23px;height:23px;border-radius:50%;background:rgba(90,113,176,.1);color:#8fa1d4;font-size:.55rem}.acc-body{padding:2px 17px 18px;border-top:1px solid rgba(111,136,202,.09)}.field{margin-top:17px}.field label{margin-bottom:8px;color:#8f99b1;font-size:.69rem}.val{color:#c9d6fb;background:rgba(75,100,170,.1);border-radius:5px;padding:2px 5px;font-size:.64rem}input[type=range]{height:14px}input[type=range]::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,#354c8a,#18213b);border-radius:20px}input[type=range]::-webkit-slider-thumb{width:14px;height:14px;margin-top:-5.5px;border:2px solid #d9e3ff;background:#637fc9;box-shadow:0 0 0 4px rgba(76,105,179,.14),0 0 15px rgba(95,128,212,.35)}select{height:44px;border:1px solid rgba(112,137,201,.17);border-radius:12px;background-color:rgba(5,9,18,.82);color:#bcc6df;font-size:.72rem;box-shadow:inset 0 1px 0 rgba(207,222,255,.025)}select:hover,select:focus{border-color:rgba(124,153,231,.42);outline:none}.cvwrap{border:1px solid rgba(119,145,211,.2);border-radius:18px;background:#010204;box-shadow:0 24px 64px rgba(0,0,0,.6),0 0 0 5px rgba(4,8,17,.5)}.yt-controls{background:linear-gradient(transparent,rgba(1,3,8,.92));padding:32px 13px 11px}.yt-timeline-track{background:rgba(183,198,235,.18)}.yt-timeline-progress{background:#6d89d5}.yt-timeline-scrubber-dot{background:#cfdbfa;box-shadow:0 0 0 4px rgba(105,137,213,.2)}.qgrid{gap:10px;margin-bottom:15px}.qgrid>div{padding:12px;border:1px solid rgba(110,134,196,.12);border-radius:14px;background:rgba(5,9,18,.44)}.qgrid select{height:40px}.ql{margin:0 0 7px;color:#6f7992;font-size:.61rem}.tport{gap:9px;margin-top:18px}.btn{min-height:43px;border:1px solid rgba(116,142,208,.22);background:rgba(7,11,22,.72);color:#aeb9d3;font-weight:600;letter-spacing:.01em}.btn:hover:not(:disabled){border-color:rgba(127,157,237,.58);background:rgba(40,59,108,.42);color:#eef3ff}.btn.pri{background:linear-gradient(180deg,#738bd0,#526db7)!important;border-color:#7d96db!important;color:#060914!important;box-shadow:inset 0 1px 0 rgba(239,244,255,.34),0 8px 24px rgba(32,55,119,.24)}.btn.pri:hover:not(:disabled){background:linear-gradient(180deg,#859ce0,#607bc8)!important}.btn:disabled{filter:saturate(.4);opacity:.3}.status{margin-top:11px;padding:11px 13px;border:1px solid rgba(103,127,189,.1);border-radius:10px;background:rgba(3,6,13,.52);color:#727d97}.status.act{color:#9fb5f0}.status.done{color:#b9c9f5}.dl{margin-top:10px;padding:12px 18px;background:#667fc5!important;color:#050813!important}.hint{color:#747f99}.fn{font-family:var(--font-mono)}
+@media(max-width:1024px){.card{padding:22px}}@media(max-width:560px){.card{padding:17px;border-radius:19px}.drop{padding:18px;min-height:90px}.drop:before{display:none}}
+</style><style>
+:root{--font-sans:'Sora',ui-sans-serif,sans-serif;--font-serif:'Sora',ui-sans-serif,sans-serif;--font-mono:'IBM Plex Mono',monospace}html,body{height:100%}body{padding:14px 18px 16px;font-weight:400}.wrap{width:100%;max-width:1540px;margin:0}header{height:48px;padding:0 2px 12px}.brand-mark{width:34px;height:24px}h1{font-family:var(--font-sans);font-size:1.08rem;font-weight:500;letter-spacing:-.035em}.panels{grid-template-columns:minmax(360px,430px) minmax(0,1fr);gap:14px;height:calc(100vh - 78px)}.card{height:100%;padding:20px;border-radius:20px;overflow-y:auto;scrollbar-width:none}.card::-webkit-scrollbar{display:none}h2{margin:19px 0 9px;font-size:.59rem;letter-spacing:.12em}.drop{min-height:68px;padding:13px 16px;border-radius:13px;font-size:.66rem}.drop:before{right:14px;width:25px;height:25px}.chips{gap:5px}.chip{min-height:29px;padding:6px 10px;font-size:.64rem}.accordion{margin-top:9px;margin-bottom:8px;border-radius:12px}.acc-header{padding:11px 13px;font-size:.62rem}.acc-header .arrow{width:20px;height:20px}.accordion.open .acc-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px;row-gap:0;max-height:700px;padding:9px 13px 13px}.field{margin-top:10px}.field label{margin-bottom:5px;font-size:.61rem}.val{padding:0;color:#8999c6;background:transparent;font-size:.58rem}input[type=range]{height:10px;opacity:.7;transition:opacity .2s}input[type=range]:hover,input[type=range]:focus{opacity:1}input[type=range]::-webkit-slider-runnable-track{height:2px;background:#202a43}input[type=range]::-webkit-slider-thumb{width:9px;height:9px;margin-top:-3.5px;border:1px solid #9dacd4;background:#526795;box-shadow:none}input[type=range]::-moz-range-track{height:2px;background:#202a43}input[type=range]::-moz-range-thumb{width:8px;height:8px;border:1px solid #9dacd4;background:#526795;box-shadow:none}.yt-vol-slider{opacity:.6}.cvwrap{max-height:calc(100vh - 385px);min-height:280px}.cvwrap canvas{width:100%;height:100%;object-fit:contain}.card:nth-child(2){display:flex;flex-direction:column}.card:nth-child(2) h2{flex:none}.card:nth-child(2) .cvwrap{flex:1}.card:nth-child(2)>div[style="margin-top:10px"]{margin-top:7px!important}.card:nth-child(2)>div[style="margin-top:10px"] select{height:38px}.qgrid{margin-bottom:7px}.qgrid>div{padding:8px 10px;border-radius:11px}.qgrid select{height:34px;padding-top:6px;padding-bottom:6px}.ql{margin-bottom:4px}.card:nth-child(2)>.field{margin-top:7px}.tport{margin-top:10px}.btn{min-height:37px;padding:9px 15px}.status{margin-top:7px;padding:8px 11px}.hint{margin:5px 0;font-size:.62rem}
+@media(min-width:1025px){body{overflow:hidden}.card:first-child .drop:nth-of-type(2){margin-top:7px!important}}
+@media(max-width:1024px){html,body{height:auto}body{overflow:auto;padding:16px}.panels{grid-template-columns:1fr;height:auto}.card{height:auto;overflow:visible}.cvwrap{max-height:none;min-height:0}.accordion.open .acc-body{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.accordion.open .acc-body{grid-template-columns:1fr}.panels{gap:12px}.card{padding:16px}}
+</style><style>
+@media(min-width:1025px){.panels{grid-template-columns:minmax(460px,510px) minmax(0,1fr)}}.output-grid{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:7px}.output-grid>div{padding:8px;border:1px solid rgba(110,134,196,.12);border-radius:11px;background:rgba(5,9,18,.44)}.output-grid select{height:33px;padding:5px 25px 5px 8px;font-size:.61rem}.bitrate-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.bitrate-grid .field{margin-top:9px}.utility-actions{margin-top:8px}.utility-actions .btn{min-height:34px}.preview-export{display:flex;justify-content:flex-end;padding-top:14px}.preview-export .btn{width:min(240px,100%)}.card:nth-child(2){overflow:hidden}.card:nth-child(2) .cvwrap{max-height:none;min-height:0;flex:1}.card:nth-child(2)>h2{margin-bottom:12px}.card:nth-child(2) .preview-export{flex:none}.card:nth-child(2) .btn.pri{min-height:42px}@media(max-width:620px){.output-grid{grid-template-columns:1fr}.bitrate-grid{grid-template-columns:1fr}.preview-export .btn{width:100%}}
+</style><style>
+/* Refined left control hierarchy */
+.card:first-child{padding:19px 20px}.card:first-child h2{margin:18px 0 8px;color:#a6afc6;font-size:.6rem;font-weight:500;letter-spacing:.08em;text-transform:none}.card:first-child h2:after{opacity:.8}.card:first-child h2:first-child{margin-top:0}.card:first-child .drop{min-height:62px;align-items:center;text-align:center;padding-left:16px;padding-right:16px}.card:first-child .drop:before{content:none;display:none}.card:first-child .drop .fn{width:100%;text-align:center}.card:first-child .chips{align-items:center}.accordion{margin:8px 0;background:transparent;border-color:transparent;border-top:1px solid rgba(143,164,221,.17);border-bottom:1px solid rgba(143,164,221,.17);border-radius:0}.accordion:hover{border-color:rgba(151,174,235,.25)}.acc-header{padding:10px 2px;background:transparent;color:#aab4cc;font-size:.61rem;font-weight:500;text-transform:none;letter-spacing:.04em}.acc-header .arrow{width:19px;height:19px;background:rgba(91,116,180,.08);border:1px solid rgba(146,170,231,.22);color:#94a5d1}.acc-body{visibility:hidden;opacity:0;max-height:0!important;padding:0!important;border-top:0!important;transform:translateY(-4px);transition:max-height .28s ease,opacity .18s ease,transform .28s ease,visibility 0s linear .28s}.accordion.open{padding-bottom:3px;border-radius:10px;background:rgba(12,19,35,.42);border:1px solid rgba(146,169,229,.19)}.accordion.open .acc-header{padding-left:11px;padding-right:11px;color:#d1d9ed}.accordion.open .acc-body{visibility:visible;opacity:1;max-height:700px!important;padding:4px 12px 12px!important;border-top:1px solid rgba(145,169,229,.12)!important;transform:none;transition:max-height .32s ease,opacity .2s ease .05s,transform .28s ease}.output-grid{display:grid;grid-template-columns:1fr;gap:0;border-top:1px solid rgba(144,167,226,.17)}.output-grid>div{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:42px;padding:4px 0;border:0;border-bottom:1px solid rgba(144,167,226,.14);border-radius:0;background:transparent}.output-grid .ql{margin:0;color:#9ba6bf;font-family:var(--font-sans);font-size:.61rem;letter-spacing:.04em;text-transform:none}.output-grid select{width:62%;height:32px;padding:4px 26px 4px 9px;border-color:rgba(148,172,232,.18);background-color:rgba(10,16,29,.52);font-size:.61rem;text-align:left}.bitrate-grid{margin-top:3px;padding-bottom:2px}.card:first-child .hint{min-height:0;margin:0}.card:first-child .dl{display:inline-flex;margin-top:8px;font-size:.65rem}.queue-item{padding:8px 10px}.drop+.queue-list:empty{display:none}.card:nth-child(2) .cvwrap canvas{width:100%;height:100%;object-fit:cover;display:block}.cvwrap{cursor:pointer;outline:none!important;-webkit-tap-highlight-color:transparent;user-select:none}.cvwrap:focus,.cvwrap:focus-visible{outline:none!important}.cvwrap canvas{pointer-events:none}@media(min-width:1025px){.panels{height:min(700px,calc(100vh - 92px))}}
+</style><style>
+/* Brighter midnight glass pass */
+body{color:#f2f5ff}.card{background:linear-gradient(145deg,rgba(11,18,34,.54),rgba(3,8,17,.43))!important;border-color:rgba(179,199,248,.27)!important;box-shadow:0 32px 90px rgba(0,0,0,.46),inset 0 1px 0 rgba(235,241,255,.15),inset 1px 0 0 rgba(202,216,252,.055),inset 0 0 70px rgba(67,91,151,.045);backdrop-filter:blur(25px) saturate(142%);-webkit-backdrop-filter:blur(25px) saturate(142%)}.card:before{background:linear-gradient(90deg,transparent 3%,rgba(214,225,255,.42) 48%,transparent 97%)}.drop{color:#b9c3d8;border-color:rgba(174,195,246,.33);background:linear-gradient(135deg,rgba(83,105,163,.11),rgba(8,15,29,.20));box-shadow:inset 0 1px 0 rgba(235,241,255,.075)}.card:first-child .drop{align-items:center!important;justify-content:center!important;text-align:center!important}.card:first-child .drop>span{display:block;width:100%;text-align:center!important}.card:first-child .drop>.fn:empty{display:none}.drop:hover,.drop.filled,.drop.over{color:#f3f6ff;border-color:rgba(165,192,255,.68);background:linear-gradient(135deg,rgba(80,106,177,.17),rgba(10,19,38,.28))}.drop .fn{color:#d2dcf7}.chip{color:#b8c2d7;border-color:rgba(163,184,235,.27);background:rgba(16,25,44,.34);box-shadow:inset 0 1px 0 rgba(234,240,255,.05);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}.chip:hover{color:#f4f7ff;border-color:rgba(173,195,251,.5);background:rgba(59,80,132,.28)}.field label{color:#b4bed2}.val{color:#bac9ec}.ql,.hint{color:#9ea9c1}select{color:#dde4f4;border-color:rgba(166,188,241,.26);background-color:rgba(7,14,27,.43);box-shadow:inset 0 1px 0 rgba(235,241,255,.07);backdrop-filter:blur(10px)}.queue-item{color:#ccd3e3;border-color:rgba(165,186,237,.22);background:rgba(12,21,38,.4)}.cvwrap{border-color:rgba(176,197,246,.32);box-shadow:0 24px 64px rgba(0,0,0,.42),0 0 0 4px rgba(13,22,40,.36),inset 0 1px 0 rgba(239,243,255,.1)}.btn{color:#d3dbee;border-color:rgba(171,193,245,.34);background:rgba(14,24,43,.4);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}.yt-time-display{color:#f2f5ff}.yt-btn{opacity:.94}
+.audio-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%}.audio-presets .chip{width:100%;padding-left:7px;padding-right:7px;white-space:normal;line-height:1.2}.audio-presets .chip:nth-child(n){grid-column:span 1}.wrap{width:min(1480px,100%);margin-left:auto;margin-right:auto}.cvwrap:fullscreen,.cvwrap:-webkit-full-screen{width:100vw!important;height:100vh!important;max-height:none!important;border:0!important;border-radius:0!important;background:#000!important}.cvwrap:fullscreen canvas,.cvwrap:-webkit-full-screen canvas{width:100%!important;height:100%!important;max-height:none!important;object-fit:contain!important}.cvwrap:fullscreen .yt-controls,.cvwrap:-webkit-full-screen .yt-controls{z-index:2}@media(min-width:1025px){.panels{grid-template-columns:minmax(490px,535px) minmax(0,1fr)}}
+</style></head>
+<body>
+<div class="weather" aria-hidden="true"><div class="stars" id="ambientStars"></div><div class="cloud cloud-a"></div><div class="cloud cloud-b"></div><div class="cloud cloud-c"></div><div class="rain" id="ambientRain"></div></div>
+<div class="wrap">
+  <header>
+    <div>
+      <svg class="brand-mark" viewBox="0 0 40 28" role="img" aria-label="Dreamdrift logo"><path d="M3 15c4.7-8 9.3-8 14 0s9.3 8 14 0"/><path class="echo" d="M9 15c3.7-5 7.3-5 11 0s7.3 5 11 0"/></svg><h1>Dreamdrift</h1>
+    </div>
+  </header>
+
+  <div class="panels">
+    <!-- ── LEFT PANEL: Audio & Visual Presets + Settings ── -->
+    <section class="card">
+      <h2>Source material</h2>
+      <div class="drop" id="aDrop">
+        <span>drop audio or video file here</span>
+        <span class="fn" id="aName"></span>
+      </div>
+      <input type="file" id="aIn" accept="audio/*,video/*,.mov,.m4v,.mkv,.avi,.flac,.aiff,.aif,.m4a,.opus" style="display:none">
+
+      <div class="queue-list" id="queueList"></div>
+
+      <div class="drop" id="iDrop" style="margin-top:10px">
+        <span>drop background image here</span>
+        <span class="fn" id="iName"></span>
+      </div>
+      <input type="file" id="iIn" accept="image/*" style="display:none">
+
+      <h2>Audio presets</h2>
+      <div class="chips audio-presets">
+        <button class="chip" data-ap="classic">Classic Slowed</button>
+        <button class="chip" data-ap="dreamy">Dreamy</button>
+        <button class="chip" data-ap="nightdrive">Night Drive</button>
+        <button class="chip" data-ap="tape">Tape</button>
+      </div>
+
+      <!-- Audio Chain Accordion -->
+      <div class="accordion" id="audioAcc">
+        <div class="acc-header" id="audioAccBtn">
+          <span>Audio chain</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="field">
+            <label title="Playback speed. 86% is the classic slowed zone.">speed <span class="val" id="spdV">86%</span></label>
+            <input type="range" id="spd" min=".5" max="1" step=".01" value=".86">
+          </div>
+          <div class="field">
+            <label title="Pitch shift in semitones, independent of speed.">pitch shift <span class="val" id="pitV">+0 st</span></label>
+            <input type="range" id="pit" min="-12" max="12" step="1" value="0">
+          </div>
+          <div class="field">
+            <label title="Long ambience tail reverb — cathedral wash.">vocal tail reverb <span class="val" id="tlV">50%</span></label>
+            <input type="range" id="tl" min="0" max="1" step=".01" value=".50">
+          </div>
+          <div class="field">
+            <label title="Short room reverb — adds depth.">medium room reverb <span class="val" id="rmV">32%</span></label>
+            <input type="range" id="rm" min="0" max="1" step=".01" value=".32">
+          </div>
+          <div class="field">
+            <label title="Asymmetric tape saturation — adds warmth.">tape warmth <span class="val" id="wtV">15%</span></label>
+            <input type="range" id="wt" min="0" max="1" step=".01" value=".15">
+          </div>
+          <div class="field">
+            <label title="Cassette motor flutter & wow rate.">cassette flutter rate <span class="val" id="fltrV">2.5 Hz</span></label>
+            <input type="range" id="fltr" min="0.1" max="8" step="0.1" value="2.5">
+          </div>
+          <div class="field">
+            <label title="Low-shelf boost at 90 Hz — adds body.">bass boost <span class="val" id="bsV">+0.0 dB</span></label>
+            <input type="range" id="bs" min="0" max="10" step=".5" value="0">
+          </div>
+          <div class="field">
+            <label title="Stereo width via M-S matrix.">stereo width <span class="val" id="swV">100%</span></label>
+            <input type="range" id="sw" min="0" max="2" step=".01" value="1">
+          </div>
+          <div class="field">
+            <label title="Time between echo repeats in seconds.">delay time <span class="val" id="dtV">0.08s</span></label>
+            <input type="range" id="dt" min=".01" max="2" step=".01" value=".08">
+          </div>
+          <div class="field">
+            <label title="Echo feedback amount.">feedback <span class="val" id="dfV">18%</span></label>
+            <input type="range" id="df" min="0" max=".9" step=".01" value=".18">
+          </div>
+          <div class="field">
+            <label title="Wet/dry mix of delay.">delay mix <span class="val" id="dmV">8%</span></label>
+            <input type="range" id="dm" min="0" max="1" step=".01" value=".08">
+          </div>
+        </div>
+      </div>
+
+      <h2>Visual presets</h2>
+      <div class="chips">
+        <button class="chip f1 on" data-vp="warm">warm tape</button>
+        <button class="chip f1" data-vp="film">desaturated</button>
+        <button class="chip f1" data-vp="golden">golden hour</button>
+        <button class="chip f1" data-vp="none">no filter</button>
+      </div>
+
+      <!-- Visual Effects Accordion -->
+      <div class="accordion" id="visualAcc">
+        <div class="acc-header" id="visualAccBtn">
+          <span>Visual effects</span>
+          <span class="arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="field">
+            <label title="Film grain intensity.">film grain <span class="val" id="grV">25%</span></label>
+            <input type="range" id="gr" min="0" max="1" step=".01" value=".25">
+          </div>
+          <div class="field">
+            <label title="Subtle analog vertical lines / scratches.">analog vertical damage <span class="val" id="dmgV">12%</span></label>
+            <input type="range" id="dmg" min="0" max="1" step=".01" value=".12">
+          </div>
+          <div class="field">
+            <label title="VHS horizontal band distortion.">vhs distortion <span class="val" id="vhV">10%</span></label>
+            <input type="range" id="vh" min="0" max="1" step=".01" value=".10">
+          </div>
+          <div class="field">
+            <label title="CRT scanlines overlay.">scanlines <span class="val" id="scV">15%</span></label>
+            <input type="range" id="sc" min="0" max="1" step=".01" value=".15">
+          </div>
+          <div class="field">
+            <label title="RGB chromatic aberration.">chromatic aberration <span class="val" id="chV">15%</span></label>
+            <input type="range" id="ch" min="0" max="1" step=".01" value=".15">
+          </div>
+          <div class="field">
+            <label title="Dark radial vignette.">vignette <span class="val" id="viV">45%</span></label>
+            <input type="range" id="vi" min="0" max="1" step=".01" value=".45">
+          </div>
+          <div class="field">
+            <label title="CRT screen flicker.">crt flicker <span class="val" id="flV">8%</span></label>
+            <input type="range" id="fl" min="0" max="1" step=".01" value=".08">
+          </div>
+          <div class="field">
+            <label title="Spectrum analyzer bars.">spectrum analyzer <span class="val" id="spV">0%</span></label>
+            <input type="range" id="sp" min="0" max="1" step=".01" value="0">
+          </div>
+        </div>
+      </div>
+
+      <h2>Composition & export</h2>
+      <div class="output-grid">
+        <div>
+          <span class="ql">Format</span>
+          <select id="ar">
+            <option value="16:9">16:9 — YouTube / Landscape</option>
+            <option value="9:16">9:16 — TikTok / Shorts</option>
+          </select>
+        </div>
+        <div>
+          <span class="ql">Resolution</span>
+          <select id="res">
+            <option value="720p">720p HD</option>
+            <option value="1080p" selected>1080p Full HD</option>
+            <option value="1440p">1440p 2K</option>
+          </select>
+        </div>
+        <div>
+          <span class="ql">Frame rate</span>
+          <select id="fps">
+            <option value="24">24 fps — cinematic</option>
+            <option value="30" selected>30 fps — standard</option>
+            <option value="60">60 fps — smooth</option>
+          </select>
+        </div>
+      </div>
+      <div class="bitrate-grid">
+        <div class="field"><label title="Video bitrate up to 40 Mbps.">video bitrate <span class="val" id="vbV">20 Mbps</span></label><input type="range" id="vb" min="4" max="40" step="2" value="20"></div>
+        <div class="field"><label title="Audio bitrate.">audio bitrate <span class="val" id="abV">320 kbps</span></label><input type="range" id="ab" min="64" max="320" step="32" value="320"></div>
+      </div>
+      <p class="hint" id="hint"></p>
+      <div hidden aria-hidden="true">
+        <button id="prvBtn" disabled></button>
+        <div id="stat"></div>
+      </div>
+      <a class="dl" id="dlLink" style="display:none">download video</a>
+    </section>
+
+    <!-- ── RIGHT PANEL: Preview & Export ── -->
+    <section class="card">
+      <h2>Preview</h2>
+      <div class="cvwrap" id="cvWrap">
+        <canvas id="cv" width="1920" height="1080"></canvas>
+        
+        <!-- YouTube Style Controls Overlay -->
+        <div class="yt-controls" id="ytControls">
+          <div class="yt-timeline-container" id="ytTimeline">
+            <div class="yt-timeline-track">
+              <div class="yt-timeline-loaded"></div>
+              <div class="yt-timeline-progress" id="ytProgBar"></div>
+              <div class="yt-timeline-scrubber-dot" id="ytDot"></div>
+            </div>
+          </div>
+          <div class="yt-bottom-row">
+            <div class="yt-left-controls">
+              <button class="yt-btn" id="ytPlayBtn" title="Play (k)">
+                <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+              <div class="yt-vol-wrap">
+                <button class="yt-btn" id="ytMuteBtn" title="Mute (m)">
+                  <svg viewBox="0 0 24 24" id="volIcon"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </button>
+                <input type="range" class="yt-vol-slider" id="ytVol" min="0" max="1" step="0.01" value="1">
+              </div>
+              <div class="yt-time-display">
+                <span id="curTimeDisp">00:00</span> / <span id="durTimeDisp">00:00</span>
+              </div>
+            </div>
+            <div class="yt-right-controls">
+              <button class="yt-btn" id="ytFullBtn" title="Fullscreen (f)">
+                <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="preview-export">
+        <button class="btn pri" id="expBtn" disabled>export current</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+/**
+ * TAPE ROOM STUDIO — Production Architecture (v8)
+ */
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+
+// ── DOM References ──────────────────────────────────────────────────────────
+const cv = $('cv'), cx = cv.getContext('2d');
+const prvBtn = $('prvBtn'), expBtn = $('expBtn');
+const stat = $('stat'), dlLink = $('dlLink');
+const curTimeDisp = $('curTimeDisp'), durTimeDisp = $('durTimeDisp');
+const queueList = $('queueList');
+const ytTimeline = $('ytTimeline'), ytProgBar = $('ytProgBar'), ytDot = $('ytDot');
+const cvWrap = $('cvWrap'), ytControls = $('ytControls');
+
+// ── Accordion Toggles ───────────────────────────────────────────────────────
+function setupAccordion(headerId, accId) {
+  const header = $(headerId), acc = $(accId);
+  header.addEventListener('click', () => { acc.classList.toggle('open'); });
+}
+setupAccordion('audioAccBtn', 'audioAcc');
+setupAccordion('visualAccBtn', 'visualAcc');
+
+// ── Application State ───────────────────────────────────────────────────────
+let queue = [];
+let currentQueueIndex = 0;
+let audioBuf = null, img = null;
+let ac = null, analyser = null, animId = null;
+let recording = false, prvSrc = null, previewLfo = null, previewGain = null, previewing = false;
+let previewRequest = 0;
+let exportUrl = null;
+let colorPre = 'warm';
+let cachedRevs = null, cachedNormGain = null;
+let specBuf = null;
+let totalDuration = 0;
+let playbackOffset = 0;
+let previewStartTime = 0;
+let isScrubbing = false;
+let lastFrameTime = 0;
+
+// ── Presets ─────────────────────────────────────────────────────────────────
+const AUDIO_PRESETS = {
+  classic:   {spd:.86,pit:-2,tl:.52,rm:.34,wt:.16,fltr:2.5,bs:2.0,sw:1.10,dt:.10,df:.20,dm:.08},
+  dreamy:    {spd:.88,pit:-1,tl:.68,rm:.46,wt:.08,fltr:1.8,bs:0.0,sw:1.25,dt:.28,df:.42,dm:.30},
+  nightdrive:{spd:.90,pit: 0,tl:.35,rm:.25,wt:.30,fltr:3.2,bs:3.0,sw:1.15,dt:.22,df:.32,dm:.18},
+  tape:      {spd:.86,pit:-1,tl:.42,rm:.28,wt:.38,fltr:4.0,bs:4.0,sw:1.00,dt:.06,df:.12,dm:.10},
+};
+
+const VISUAL_PRESETS = {
+  warm:   {gr:.25,dmg:.12,vh:.10,sc:.15,ch:.15,vi:.45,fl:.08,sp:0,c:'warm'},
+  film:   {gr:.40,dmg:.22,vh:.30,sc:.30,ch:.25,vi:.60,fl:.12,sp:0,c:'film'},
+  golden: {gr:.20,dmg:.08,vh:.05,sc:.08,ch:.10,vi:.35,fl:.04,sp:0,c:'golden'},
+  none:   {gr:0,dmg:0,vh:0,sc:0,ch:0,vi:0,fl:0,sp:0,c:'none'},
+};
+
+const RES = {'720p':{w:1280,h:720},'1080p':{w:1920,h:1080},'1440p':{w:2560,h:1440}};
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+const pct   = v => Math.round(+v * 100) + '%';
+const dB    = v => (v > 0 ? '+' : '') + (+v).toFixed(1) + ' dB';
+const semi  = v => (+v >= 0 ? '+' : '') + v + ' st';
+const fmtB  = b => b < 1e9 ? (b/1e6).toFixed(1)+' MB' : (b/1e9).toFixed(2)+' GB';
+const fmtT  = s => `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60|0).toString().padStart(2,'0')}`;
+function setStatus(t, cls) { stat.textContent = t; stat.className = 'status' + (cls ? ' '+cls : ''); }
+
+// ── Default rainy lo-fi visual ──────────────────────────────────────────────
+function initDefaultImage() {
+  const c = document.createElement('canvas');
+  c.width = 1920; c.height = 1080;
+  const ctx = c.getContext('2d');
+
+  const room = ctx.createLinearGradient(0, 0, 0, 1080);
+  room.addColorStop(0, '#091125');
+  room.addColorStop(0.62, '#11172a');
+  room.addColorStop(1, '#070a12');
+  ctx.fillStyle = room;
+  ctx.fillRect(0, 0, 1920, 1080);
+
+  // Recessed window and blue night sky.
+  ctx.fillStyle = '#050813';
+  ctx.fillRect(230, 70, 1460, 805);
+  const sky = ctx.createLinearGradient(0, 90, 0, 850);
+  sky.addColorStop(0, '#111d3c');
+  sky.addColorStop(0.55, '#162544');
+  sky.addColorStop(1, '#26344b');
+  ctx.fillStyle = sky;
+  ctx.fillRect(265, 105, 1390, 730);
+
+  // Soft moonlight behind the rain.
+  const moon = ctx.createRadialGradient(1360, 235, 8, 1360, 235, 185);
+  moon.addColorStop(0, 'rgba(205,218,244,.34)');
+  moon.addColorStop(0.25, 'rgba(146,168,215,.13)');
+  moon.addColorStop(1, 'rgba(70,91,141,0)');
+  ctx.fillStyle = moon;
+  ctx.fillRect(1140, 20, 440, 430);
+  ctx.fillStyle = 'rgba(218,226,240,.55)';
+  ctx.beginPath(); ctx.arc(1360, 235, 43, 0, Math.PI * 2); ctx.fill();
+
+  // Distant city silhouettes and scattered windows.
+  const buildings = [
+    [265,620,170,215],[420,545,145,290],[545,655,190,180],[720,500,205,335],
+    [905,590,145,245],[1040,530,220,305],[1240,645,165,190],[1390,565,265,270]
+  ];
+  buildings.forEach(([x,y,w,h], bi) => {
+    ctx.fillStyle = bi % 2 ? '#0a1020' : '#0c1426';
+    ctx.fillRect(x,y,w,h);
+    ctx.fillStyle = 'rgba(141,166,208,.28)';
+    for(let wy=y+28; wy<y+h-18; wy+=43) {
+      for(let wx=x+22; wx<x+w-16; wx+=38) {
+        if(((wx+wy+bi*17)/7|0)%4===0) ctx.fillRect(wx,wy,9,13);
+      }
+    }
+  });
+
+  // Deterministic rain streaks on the glass.
+  ctx.lineCap = 'round';
+  for(let i=0;i<180;i++) {
+    const x = 275 + ((i * 83) % 1365);
+    const y = 115 + ((i * 137) % 690);
+    const len = 14 + (i % 7) * 6;
+    ctx.strokeStyle = `rgba(180,202,235,${0.08 + (i%5)*0.025})`;
+    ctx.lineWidth = i % 9 === 0 ? 3 : 1.5;
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-8,y+len); ctx.stroke();
+  }
+  for(let i=0;i<28;i++) {
+    const x=290+((i*211)%1320), y=130+((i*97)%650);
+    ctx.fillStyle='rgba(195,213,238,.16)';
+    ctx.beginPath();ctx.ellipse(x,y,3+(i%3),8+(i%5),.18,0,Math.PI*2);ctx.fill();
+  }
+
+  // Window mullions, sill, and the dark room foreground.
+  ctx.fillStyle = '#080b14';
+  ctx.fillRect(943, 85, 34, 770);
+  ctx.fillRect(245, 438, 1430, 28);
+  ctx.fillStyle = '#111522';
+  ctx.fillRect(205, 835, 1510, 55);
+  ctx.fillStyle = '#080a11';
+  ctx.fillRect(0, 890, 1920, 190);
+
+  // Minimal lo-fi desk silhouette and a warm listening lamp.
+  ctx.fillStyle = '#0f1320';
+  ctx.fillRect(390, 915, 1140, 30);
+  ctx.fillRect(450, 945, 28, 135);
+  ctx.fillRect(1442, 945, 28, 135);
+  const lamp = ctx.createRadialGradient(590, 800, 5, 590, 800, 170);
+  lamp.addColorStop(0, 'rgba(128,151,209,.30)');
+  lamp.addColorStop(1, 'rgba(53,73,125,0)');
+  ctx.fillStyle=lamp;ctx.fillRect(410,620,360,350);
+  ctx.strokeStyle='#242d49';ctx.lineWidth=12;
+  ctx.beginPath();ctx.moveTo(585,910);ctx.lineTo(585,790);ctx.lineTo(650,720);ctx.stroke();
+  ctx.fillStyle='#344368';
+  ctx.beginPath();ctx.moveTo(602,708);ctx.lineTo(716,744);ctx.lineTo(660,810);ctx.lineTo(565,770);ctx.closePath();ctx.fill();
+
+  // Subtle illustrated grain keeps the placeholder from feeling photographic.
+  for(let i=0;i<1400;i++) {
+    const x=(i*47)%1920, y=(i*89)%1080;
+    ctx.fillStyle=`rgba(210,220,240,${(i%4)*.006})`;
+    ctx.fillRect(x,y,1,1);
+  }
+
+  img = new Image();
+  img.onload = () => { if(!previewing) drawFrame(0, false); };
+  img.src = c.toDataURL('image/jpeg', 0.9);
+}
+
+// ── Loudness Normalization (-14 LUFS) ───────────────────────────────────────
+function getNormGain() {
+  if (cachedNormGain !== null) return cachedNormGain;
+  if (!audioBuf) return 1;
+  const target = Math.pow(10, -16/20);
+  let sum = 0, n = 0;
+  for (let ch = 0; ch < audioBuf.numberOfChannels; ch++) {
+    const d = audioBuf.getChannelData(ch);
+    for (let i = 0; i < d.length; i++) { sum += d[i]*d[i]; n++; }
+  }
+  const rms = Math.sqrt(sum/n);
+  cachedNormGain = rms > 0.0001 ? Math.min(target/rms, 4) : 1;
+  return cachedNormGain;
+}
+
+// ── Reverb IR Generation ────────────────────────────────────────────────────
+function getRevBuffers() {
+  if (cachedRevs && cachedRevs.sr === ac.sampleRate) return cachedRevs;
+  cachedRevs = { sr: ac.sampleRate, tail: makeRev(4.2, 2.0, true), room: makeRev(1.8, 2.8, false) };
+  return cachedRevs;
+}
+function makeRev(secs, decay, isTail) {
+  const rate = ac.sampleRate, len = Math.floor(rate * secs);
+  const buf = ac.createBuffer(2, len, rate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = buf.getChannelData(ch);
+    const erLen = Math.floor(rate * 0.08);
+    for (let k = 0; k < 18; k++) {
+      const t = Math.floor(Math.pow(Math.random(), 1.5) * erLen);
+      if (t < len) d[t] += (Math.random()*2-1) * Math.exp(-t/(rate*0.015)) * 0.7;
+    }
+    const a = 0.65, b = 1-a; let yn = 0;
+    for (let i = 0; i < len; i++) {
+      const t = i/len;
+      let env = Math.pow(1-t, decay);
+      if (isTail) env *= (1 - Math.exp(-t*22));
+      yn = a*((Math.random()*2-1)*env) + b*yn;
+      d[i] += yn;
+    }
+  }
+  return buf;
+}
+
+function makeWaveshaper(amount, n=2048) {
+  const c = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const x = (i/(n-1))*2 - 1, k = 2 + amount*4;
+    c[i] = (1-amount)*x + amount*(x*(k+1)/(k+Math.abs(x*(k+1))));
+  }
+  return c;
+}
+
+function getAnalyser() {
+  if (!analyser) {
+    analyser = ac.createAnalyser();
+    analyser.fftSize = 256; analyser.smoothingTimeConstant = 0.82;
+    analyser.minDecibels = -85; analyser.maxDecibels = -10;
+  }
+  return analyser;
+}
+
+// ── Audio Graph Builder ─────────────────────────────────────────────────────
+function buildGraph(dest, offset = 0) {
+  const playRate = +$('spd').value * Math.pow(2, +$('pit').value/12);
+  const revs = getRevBuffers();
+  const width = +$('sw').value;
+
+  const src = ac.createBufferSource();
+  src.buffer = audioBuf; src.playbackRate.value = playRate;
+
+  const flutterGain = ac.createGain(); flutterGain.gain.value = 1.0;
+  const lfo = ac.createOscillator(); lfo.frequency.value = +$('fltr').value;
+  const lfoDepth = ac.createGain(); lfoDepth.gain.value = 0.008 * (+$('wt').value + 0.1);
+  lfo.connect(lfoDepth); lfoDepth.connect(src.playbackRate); lfo.start(0);
+
+  const normGain = ac.createGain(); normGain.gain.value = getNormGain();
+  const dcb = ac.createBiquadFilter(); dcb.type = 'highpass'; dcb.frequency.value = 20;
+
+  const preEmph = ac.createBiquadFilter(); preEmph.type = 'highshelf'; preEmph.frequency.value = 3000; preEmph.gain.value = 6;
+  const shaper = ac.createWaveShaper(); shaper.curve = makeWaveshaper(+$('wt').value); shaper.oversample = '4x';
+  const deEmph = ac.createBiquadFilter(); deEmph.type = 'highshelf'; deEmph.frequency.value = 3000; deEmph.gain.value = -6;
+
+  const tapeRoll = ac.createBiquadFilter(); tapeRoll.type = 'highshelf'; tapeRoll.frequency.value = 14000; tapeRoll.gain.value = -5;
+  const bassEQ = ac.createBiquadFilter(); bassEQ.type = 'lowshelf'; bassEQ.frequency.value = 90; bassEQ.gain.value = +$('bs').value;
+
+  const dry = ac.createGain(); dry.gain.value = 0.82;
+
+  const tailConv = ac.createConvolver(); tailConv.buffer = revs.tail;
+  const tailGain = ac.createGain(); tailGain.gain.value = +$('tl').value;
+  const roomConv = ac.createConvolver(); roomConv.buffer = revs.room;
+  const roomGain = ac.createGain(); roomGain.gain.value = +$('rm').value;
+
+  const delay = ac.createDelay(5); delay.delayTime.value = +$('dt').value;
+  const delHPF = ac.createBiquadFilter(); delHPF.type = 'highpass'; delHPF.frequency.value = 200;
+  const delLPF = ac.createBiquadFilter(); delLPF.type = 'lowpass'; delLPF.frequency.value = 6000;
+  const fbGain = ac.createGain(); fbGain.gain.value = Math.min(+$('df').value, 0.88);
+  const delWet = ac.createGain(); delWet.gain.value = +$('dm').value;
+
+  const limiter = ac.createDynamicsCompressor();
+  limiter.threshold.value = -3; limiter.knee.value = 2;
+  limiter.ratio.value = 20; limiter.attack.value = 0.001; limiter.release.value = 0.08;
+  const makeup = ac.createGain(); makeup.gain.value = 1.26;
+
+  let out;
+  if (Math.abs(width-1) < 0.01) {
+    out = makeup;
+  } else {
+    const sp = ac.createChannelSplitter(2), mg = ac.createChannelMerger(2);
+    const gLL = ac.createGain(), gRL = ac.createGain(), gLR = ac.createGain(), gRR = ac.createGain();
+    gLL.gain.value = (1+width)/2; gRL.gain.value = (1-width)/2;
+    gLR.gain.value = (1-width)/2; gRR.gain.value = (1+width)/2;
+    makeup.connect(sp);
+    sp.connect(gLL,0); sp.connect(gRL,1); sp.connect(gLR,0); sp.connect(gRR,1);
+    gLL.connect(mg,0,0); gRL.connect(mg,0,0);
+    gLR.connect(mg,0,1); gRR.connect(mg,0,1);
+    out = mg;
+  }
+  out.connect(dest);
+  makeup.connect(getAnalyser());
+
+  src.connect(normGain); normGain.connect(dcb);
+  dcb.connect(preEmph); preEmph.connect(shaper); shaper.connect(deEmph);
+  deEmph.connect(tapeRoll); tapeRoll.connect(bassEQ);
+  bassEQ.connect(dry);
+  bassEQ.connect(tailConv); tailConv.connect(tailGain);
+  bassEQ.connect(roomConv); roomConv.connect(roomGain);
+  bassEQ.connect(delay);
+  delay.connect(delHPF); delHPF.connect(delLPF); delHPF.connect(fbGain); fbGain.connect(delay);
+  delay.connect(delWet);
+  dry.connect(limiter); tailGain.connect(limiter); roomGain.connect(limiter); delWet.connect(limiter);
+  limiter.connect(makeup);
+
+  const effectiveDuration = audioBuf.duration / playRate;
+  return { src, duration: effectiveDuration, offset, lfo };
+}
+
+// ── Grain & Film Damage Generation (Slower & Sparse Vertical Scratches) ─────
+const GRAIN_N = 12;
+const grainFrames = (() => {
+  const frames = [];
+  for (let f = 0; f < GRAIN_N; f++) {
+    const t = document.createElement('canvas'); t.width = 512; t.height = 512;
+    const tc = t.getContext('2d'), d = tc.createImageData(512,512);
+    for (let i = 0; i < d.data.length; i+=4) {
+      const u = Math.random()||1e-10, v = Math.random();
+      const g = Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v);
+      const val = Math.max(0,Math.min(255,128+g*35));
+      d.data[i]=d.data[i+1]=d.data[i+2]=val; d.data[i+3]=255;
+    }
+    tc.putImageData(d,0,0); frames.push(t);
+  }
+  return frames;
+})();
+
+let scanCache=null, vhsBuf=null, vhsCx=null;
+function getScanlines(w,h) {
+  if (scanCache && scanCache.width===w && scanCache.height===h) return scanCache;
+  scanCache = document.createElement('canvas'); scanCache.width=w; scanCache.height=h;
+  const sc = scanCache.getContext('2d'); sc.fillStyle='#000';
+  for (let y=0;y<h;y+=3) sc.fillRect(0,y,w,1);
+  return scanCache;
+}
+function getVhsBuf(w,h) {
+  if (!vhsBuf||vhsBuf.width!==w||vhsBuf.height!==h) {
+    vhsBuf=document.createElement('canvas'); vhsBuf.width=w; vhsBuf.height=h;
+    vhsCx=vhsBuf.getContext('2d');
+  }
+  return vhsCx;
+}
+
+// ── Canvas Rendering Engine ────────────────────────────────────────────────
+function drawFrame(tSec, animate) {
+  if (!img) return;
+  const w=cv.width, h=cv.height;
+  const grA=+$('gr').value, dmgA=+$('dmg').value, vhA=+$('vh').value, scA=+$('sc').value;
+  const chA=+$('ch').value, viA=+$('vi').value, flA=+$('fl').value;
+  const spA=+$('sp').value;
+
+  cx.save();
+  cx.clearRect(0,0,w,h);
+  const zoom = 1+(animate?Math.min(tSec/50,1):0)*0.05;
+  cx.translate(w/2,h/2); cx.scale(zoom,zoom); cx.translate(-w/2,-h/2);
+
+  if (colorPre === 'warm') {
+    cx.filter = 'sepia(0.38) saturate(1.22) contrast(1.06) brightness(0.96) hue-rotate(-5deg)';
+  } else if (colorPre === 'film') {
+    cx.filter = 'grayscale(0.6) contrast(1.15) brightness(0.88) saturate(0.85)';
+  } else if (colorPre === 'golden') {
+    cx.filter = 'sepia(0.55) saturate(1.35) contrast(1.1) brightness(1.02) hue-rotate(-12deg)';
+  } else {
+    cx.filter = 'none';
+  }
+  cover(w,h);
+  cx.filter='none';
+
+  if (chA>0) {
+    const px=Math.round(chA*10);
+    cx.globalAlpha=chA*0.5; cx.globalCompositeOperation='screen';
+    cx.filter='saturate(3.5) hue-rotate(-15deg) brightness(.6)'; cover(w,h,-px,0);
+    cx.filter='saturate(3.5) hue-rotate(200deg) brightness(.6)'; cover(w,h,px,0);
+    cx.filter='none';
+    cx.globalCompositeOperation='source-over'; cx.globalAlpha=1;
+  }
+
+  cx.restore();
+
+  if (viA>0) {
+    const vg=cx.createRadialGradient(w/2,h/2,h*.3,w/2,h/2,Math.max(w,h)*.7);
+    const a=colorPre==='golden'?viA*0.6:viA*0.7;
+    vg.addColorStop(0,'rgba(0,0,0,0)');
+    vg.addColorStop(1,colorPre==='golden'?`rgba(8,13,30,${a})`:`rgba(0,0,0,${a})`);
+    cx.fillStyle=vg; cx.fillRect(0,0,w,h);
+  }
+  if (grA>0) {
+    const frame=grainFrames[animate?(Math.floor(tSec*12)%GRAIN_N):0];
+    const ox=(Math.random()*512)|0, oy=(Math.random()*512)|0;
+    cx.globalAlpha=grA*0.28; cx.globalCompositeOperation='overlay';
+    for(let x=-ox;x<w;x+=512) for(let y=-oy;y<h;y+=512) cx.drawImage(frame,x,y);
+    cx.globalCompositeOperation='source-over'; cx.globalAlpha=1;
+  }
+
+  // Slower, Sparse Vertical Film Scratches / Lines Only
+  if (dmgA > 0 && animate) {
+    cx.save();
+    cx.globalAlpha = dmgA * 0.45;
+    cx.strokeStyle = 'rgba(255, 255, 250, 0.4)';
+    cx.lineWidth = 1.2;
+    // Pseudo-random but temporally coherent slow-moving vertical lines
+    const seed = Math.floor(tSec * 1.5);
+    for (let i = 0; i < 2; i++) {
+      const rx = (Math.sin(seed + i * 99) * 0.5 + 0.5) * w;
+      cx.beginPath();
+      cx.moveTo(rx, 0);
+      cx.lineTo(rx + (Math.random() - 0.5) * 4, h);
+      cx.stroke();
+    }
+    cx.restore();
+  }
+
+  if (scA>0) { cx.globalAlpha=scA*0.32; cx.drawImage(getScanlines(w,h),0,0); cx.globalAlpha=1; }
+  if (vhA>0&&animate) {
+    const vc=getVhsBuf(w,h); vc.drawImage(cv,0,0);
+    const bands=Math.ceil(vhA*6);
+    for(let i=0;i<bands;i++) {
+      if(Math.random()<vhA*0.2) {
+        const gy=(Math.random()*h)|0, gh=(Math.random()*5+1)|0;
+        cx.drawImage(vhsBuf,0,gy,w,gh,(Math.random()-.5)*vhA*16,gy,w,gh);
+      }
+    }
+  }
+  if (animate&&flA>0) {
+    const fl=(Math.sin(tSec*11)+Math.sin(tSec*6.2))*0.012*flA;
+    if (fl>0) { cx.fillStyle=`rgba(255,255,255,${fl})`; cx.fillRect(0,0,w,h); }
+    else       { cx.fillStyle=`rgba(0,0,0,${-fl})`; cx.fillRect(0,0,w,h); }
+  }
+  if (spA>0&&analyser) {
+    const bins=analyser.frequencyBinCount;
+    if(!specBuf||specBuf.length!==bins) specBuf=new Uint8Array(bins);
+    analyser.getByteFrequencyData(specBuf);
+    const barH=h*0.16, barW=w/bins;
+    cx.fillStyle=`rgba(0,0,0,${spA*0.4})`; cx.fillRect(0,h-barH,w,barH);
+    for(let i=0;i<bins;i++){
+      const v=specBuf[i]/255; if(v<0.01) continue;
+      const bh=v*barH, alpha=spA*(0.5+v*0.5);
+      cx.fillStyle=`hsla(${28+v*18},85%,62%,${alpha})`;
+      cx.fillRect(i*barW, h-bh, Math.max(barW-1,1), bh);
+    }
+  }
+}
+function cover(w,h,ox=0,oy=0) {
+  const ir=img.width/img.height, cr=w/h;
+  const dw=ir>cr?h*ir:w, dh=ir>cr?h:w/ir;
+  cx.drawImage(img,(w-dw)/2+ox,(h-dh)/2+oy,dw,dh);
+}
+
+function applyDims() {
+  const r=RES[$('res').value], port=$('ar').value==='9:16';
+  cv.width=port?r.h:r.w; cv.height=port?r.w:r.h;
+  scanCache=null; refreshLabels();
+}
+$('ar').addEventListener('change', applyDims);
+$('res').addEventListener('change', applyDims);
+
+// ── Live Parameter Updates ──────────────────────────────────────────────────
+let drawTimer=null;
+function refreshLabels() {
+  $('spdV').textContent = pct($('spd').value);
+  $('pitV').textContent = semi($('pit').value);
+  $('tlV').textContent  = pct($('tl').value);
+  $('rmV').textContent  = pct($('rm').value);
+  $('wtV').textContent  = pct($('wt').value);
+  $('fltrV').textContent= (+$('fltr').value).toFixed(1)+' Hz';
+  $('bsV').textContent  = dB($('bs').value);
+  $('swV').textContent  = pct($('sw').value);
+  $('dtV').textContent  = (+$('dt').value).toFixed(2)+'s';
+  $('dfV').textContent  = pct($('df').value);
+  $('dmV').textContent  = pct($('dm').value);
+  $('grV').textContent  = pct($('gr').value);
+  $('dmgV').textContent = pct($('dmg').value);
+  $('vhV').textContent  = pct($('vh').value);
+  $('scV').textContent  = pct($('sc').value);
+  $('chV').textContent  = pct($('ch').value);
+  $('viV').textContent  = pct($('vi').value);
+  $('flV').textContent  = pct($('fl').value);
+  $('spV').textContent  = pct($('sp').value);
+  $('vbV').textContent  = $('vb').value+' Mbps';
+  $('abV').textContent  = $('ab').value+' kbps';
+  updateHint(); saveSettings();
+  
+  clearTimeout(drawTimer);
+  drawTimer = setTimeout(()=>{ if(img&&!previewing) drawFrame(0,false); }, 20);
+
+  if (previewing && prvSrc && ac) {
+    const playRate = +$('spd').value * Math.pow(2, +$('pit').value/12);
+    try { prvSrc.playbackRate.setValueAtTime(playRate, ac.currentTime); } catch {}
+  }
+}
+function updateHint() {
+  const h=$('hint'); if(!audioBuf){h.style.display='none';return;}
+  const dur=audioBuf.duration/(+$('spd').value*Math.pow(2,+$('pit').value/12));
+  const sz=(+$('vb').value*1e6 + +$('ab').value*1e3)*dur/8;
+  h.style.display='block';
+  h.innerHTML='est. file size: <span>'+fmtB(sz)+'</span> ('+dur.toFixed(1)+'s @ '+$('vb').value+'Mbps/'+$('ab').value+'kbps)';
+  totalDuration = dur;
+  durTimeDisp.textContent = fmtT(dur);
+}
+document.querySelectorAll('input[type=range]').forEach(el=>el.addEventListener('input',refreshLabels));
+[$('fps'),$('vb'),$('ab')].forEach(el=>el.addEventListener('change',refreshLabels));
+
+// ── YouTube Style Player Controls & Timeline Interaction ─────────────────────
+const playIconHtml = `<path d="M8 5v14l11-7z"/>`;
+const pauseIconHtml = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
+const volIconHtml = `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>`;
+const muteIconHtml = `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>`;
+
+function seekToTime(tSec) {
+  if (!audioBuf) return;
+  tSec = Math.max(0, Math.min(tSec, totalDuration));
+  const playRate = +$('spd').value * Math.pow(2, +$('pit').value/12);
+  playbackOffset = Math.min(tSec * playRate, Math.max(0, audioBuf.duration - 0.001));
+  curTimeDisp.textContent = fmtT(tSec);
+  const pctVal = (tSec / totalDuration) * 100;
+  ytProgBar.style.width = pctVal + '%';
+  ytDot.style.left = pctVal + '%';
+  drawFrame(tSec, false);
+
+  if (previewing && ac) {
+    startPreviewGraph(playbackOffset);
+    previewStartTime = ac.currentTime - tSec;
+  }
+}
+
+// Click timeline or drag
+let isDraggingTimeline = false;
+ytTimeline.addEventListener('mousedown', e => {
+  if (!audioBuf) return;
+  isDraggingTimeline = true;
+  ytTimeline.classList.add('active');
+  updateTimelineFromEvent(e);
+});
+window.addEventListener('mousemove', e => {
+  if (!isDraggingTimeline || !audioBuf) return;
+  updateTimelineFromEvent(e);
+});
+window.addEventListener('mouseup', () => {
+  if (isDraggingTimeline) {
+    isDraggingTimeline = false;
+    ytTimeline.classList.remove('active');
+  }
+});
+
+function updateTimelineFromEvent(e) {
+  const rect = ytTimeline.getBoundingClientRect();
+  const clickX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+  const ratio = clickX / rect.width;
+  seekToTime(ratio * totalDuration);
+}
+
+// ── Preview Player Loop ─────────────────────────────────────────────────────
+function disposePreviewGraph() {
+  if (prvSrc) { try { prvSrc.stop(); } catch {} prvSrc = null; }
+  if (previewLfo) { try { previewLfo.stop(); } catch {} previewLfo = null; }
+  if (previewGain) { try { previewGain.disconnect(); } catch {} previewGain = null; }
+}
+
+function startPreviewGraph(offset) {
+  disposePreviewGraph();
+  previewGain = ac.createGain();
+  previewGain.gain.setValueAtTime(+$('ytVol').value, ac.currentTime);
+  previewGain.connect(ac.destination);
+  const graph = buildGraph(previewGain, offset);
+  graph.src.start(0, offset);
+  prvSrc = graph.src;
+  previewLfo = graph.lfo;
+}
+
+async function togglePreview() {
+  if (previewing) {
+    const playRate = +$('spd').value * Math.pow(2, +$('pit').value/12);
+    const pausedAt = Math.max(0, Math.min(ac.currentTime - previewStartTime, totalDuration));
+    playbackOffset = Math.min(pausedAt * playRate, Math.max(0, audioBuf.duration - 0.001));
+    curTimeDisp.textContent = fmtT(pausedAt);
+    stopPreview();
+    return;
+  }
+  if (!audioBuf || !img) return;
+  const request = ++previewRequest;
+  if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+  await ac.resume();
+  if (request !== previewRequest || recording) return;
+
+  previewing = true;
+  $('playIcon').innerHTML = pauseIconHtml;
+  prvBtn.textContent = '■ stop';
+
+  const playRate = +$('spd').value * Math.pow(2, +$('pit').value/12);
+  startPreviewGraph(playbackOffset);
+  
+  setStatus('previewing — normalized to −14 LUFS.', 'act');
+  previewStartTime = ac.currentTime - ((playbackOffset / audioBuf.duration) * totalDuration);
+
+  (function loop() {
+    if (!previewing || request !== previewRequest) return;
+    const t = ac.currentTime - previewStartTime;
+
+    if (t >= totalDuration) {
+      playbackOffset = 0;
+      stopPreview();
+      seekToTime(0);
+      setStatus('preview finished.', 'done');
+      return;
+    }
+
+    if (!isDraggingTimeline) {
+      curTimeDisp.textContent = fmtT(t);
+      const pctVal = (t / totalDuration) * 100;
+      ytProgBar.style.width = pctVal + '%';
+      ytDot.style.left = pctVal + '%';
+    }
+
+    drawFrame(t, true);
+    animId = requestAnimationFrame(loop);
+  })();
+}
+
+function stopPreview() {
+  previewRequest++;
+  previewing = false;
+  cancelAnimationFrame(animId);
+  disposePreviewGraph();
+  $('playIcon').innerHTML = playIconHtml;
+  prvBtn.textContent = 'preview';
+  setStatus('stopped.');
+}
+
+$('ytPlayBtn').addEventListener('click', togglePreview);
+prvBtn.addEventListener('click', togglePreview);
+cvWrap.addEventListener('click', event => {
+  // Keep timeline, volume, and fullscreen controls independent from the
+  // full-surface play/pause gesture.
+  if (event.target.closest('button, input, .yt-timeline-container')) return;
+  togglePreview();
+});
+cvWrap.setAttribute('role', 'button');
+cvWrap.setAttribute('tabindex', '0');
+cvWrap.setAttribute('aria-label', 'Play or pause preview');
+cvWrap.addEventListener('keydown', event => {
+  if (event.key !== ' ' && event.key !== 'Enter') return;
+  event.preventDefault();
+  togglePreview();
+});
+
+function parseTime(str) {
+  const parts = str.split(':');
+  return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+}
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+  if (event.target.closest('input, select, button, textarea')) return;
+  if (!audioBuf) return;
+  event.preventDefault();
+  const currentSec = previewing && ac
+    ? Math.max(0, ac.currentTime - previewStartTime)
+    : parseTime(curTimeDisp.textContent);
+  seekToTime(currentSec + (event.key === 'ArrowRight' ? 5 : -5));
+});
+
+// Volume Control
+const ytVol = $('ytVol');
+ytVol.addEventListener('input', () => {
+  const v = +ytVol.value;
+  if (previewGain && ac) {
+    previewGain.gain.cancelScheduledValues(ac.currentTime);
+    previewGain.gain.setTargetAtTime(v, ac.currentTime, 0.015);
+  }
+  if (v === 0) {
+    $('volIcon').innerHTML = muteIconHtml;
+  } else {
+    $('volIcon').innerHTML = volIconHtml;
+  }
+});
+$('ytMuteBtn').addEventListener('click', () => {
+  if (ytVol.value > 0) {
+    ytVol.dataset.prev = ytVol.value;
+    ytVol.value = 0;
+  } else {
+    ytVol.value = ytVol.dataset.prev || 1;
+  }
+  ytVol.dispatchEvent(new Event('input'));
+});
+
+// Fullscreen Toggle
+const ytFullBtn = $('ytFullBtn');
+ytFullBtn.addEventListener('click', async () => {
+  const activeFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+  try {
+    if (!activeFullscreen) {
+      if (cvWrap.requestFullscreen) {
+        await cvWrap.requestFullscreen({ navigationUI: 'hide' });
+      } else if (cvWrap.webkitRequestFullscreen) {
+        cvWrap.webkitRequestFullscreen();
+      } else {
+        throw new Error('Fullscreen is not supported in this browser.');
+      }
+    } else if (document.exitFullscreen) {
+      await document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  } catch (error) {
+    console.warn('Fullscreen failed', error);
+    ytFullBtn.title = error.message || 'Fullscreen unavailable';
+  }
+});
+
+const syncFullscreenButton = () => {
+  const active = document.fullscreenElement === cvWrap || document.webkitFullscreenElement === cvWrap;
+  ytFullBtn.title = active ? 'Exit fullscreen (f)' : 'Fullscreen (f)';
+  ytFullBtn.setAttribute('aria-label', ytFullBtn.title);
+  if (img && !previewing) drawFrame(parseTime(curTimeDisp.textContent), false);
+};
+document.addEventListener('fullscreenchange', syncFullscreenButton);
+document.addEventListener('webkitfullscreenchange', syncFullscreenButton);
+
+// ── Independent Audio & Visual Presets ──────────────────────────────────────
+document.querySelectorAll('[data-ap]').forEach(btn => btn.addEventListener('click', () => {
+  const p = AUDIO_PRESETS[btn.dataset.ap]; if (!p) return;
+  document.querySelectorAll('[data-ap]').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  $('spd').value = p.spd; $('pit').value = p.pit; $('tl').value = p.tl; $('rm').value = p.rm;
+  $('wt').value = p.wt; $('fltr').value = p.fltr; $('bs').value = p.bs; $('sw').value = p.sw;
+  $('dt').value = p.dt; $('df').value = p.df; $('dm').value = p.dm;
+  refreshLabels();
+}));
+
+document.querySelectorAll('[data-vp]').forEach(btn => btn.addEventListener('click', () => {
+  const p = VISUAL_PRESETS[btn.dataset.vp]; if (!p) return;
+  document.querySelectorAll('[data-vp]').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  $('gr').value = p.gr; $('dmg').value = p.dmg; $('vh').value = p.vh; $('sc').value = p.sc;
+  $('ch').value = p.ch; $('vi').value = p.vi; $('fl').value = p.fl; $('sp').value = p.sp;
+  colorPre = p.c;
+  refreshLabels();
+}));
+
+// ── Single File Drop Handling ───────────────────────────────────────────────
+function renderQueueUI() {
+  queueList.innerHTML = '';
+  queue.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'queue-item' + (idx === currentQueueIndex ? ' active' : '');
+    div.innerHTML = `<span class="qname">${item.name}</span><span class="qrem" data-idx="${idx}">×</span>`;
+    queueList.appendChild(div);
+  });
+
+  queueList.querySelectorAll('.qrem').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = +btn.dataset.idx;
+      queue.splice(idx, 1);
+      currentQueueIndex = 0;
+      audioBuf = null;
+      playbackOffset = 0;
+      $('aName').textContent = '';
+      $('aDrop').classList.remove('filled');
+      renderQueueUI();
+      enable();
+    });
+  });
+}
+
+function bindDrop(zoneId, inputId) {
+  const zone = $(zoneId), input = $(inputId);
+  zone.addEventListener('click', () => input.click());
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('over');
+    const file = Array.from(e.dataTransfer.files).find(f =>
+      f.type.startsWith('audio/') || f.type.startsWith('video/')
+    );
+    if (!file) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change'));
+  });
+}
+
+bindDrop('aDrop', 'aIn');
+bindDrop('iDrop', 'iIn');
+
+$('aIn').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+  await ac.resume();
+
+  setStatus('decoding ' + file.name + '…', 'act');
+  try {
+    let buf = null;
+    try {
+      buf = await ac.decodeAudioData(await file.arrayBuffer());
+    } catch {
+      buf = await extractViaEl(file);
+    }
+    if (!buf) throw new Error('No audio track could be decoded.');
+    stopPreview();
+    queue = [{ file, name: file.name, buffer: buf }];
+    currentQueueIndex = 0;
+    audioBuf = buf;
+    playbackOffset = 0;
+    $('aName').textContent = file.name;
+    $('aDrop').classList.add('filled');
+  } catch (err) {
+    queue = [];
+    audioBuf = null;
+    setStatus('This file could not be decoded.', 'act');
+    console.warn('Failed to decode', file.name, err);
+  }
+
+  renderQueueUI();
+  cachedRevs = null; cachedNormGain = null; analyser = null;
+  enable();
+  if (audioBuf) {
+    seekToTime(0);
+    setStatus('ready to preview or export.', 'done');
+    window.prepareFFmpeg?.().catch(() => {});
+  }
+  e.target.value = '';
+});
+
+$('iIn').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  $('iName').textContent = file.name; $('iDrop').classList.add('filled');
+  const url = URL.createObjectURL(file);
+  const image = new Image();
+  image.onload = () => { URL.revokeObjectURL(url); img = image; drawFrame(0, false); enable(); };
+  image.src = url;
+});
+
+function extractViaEl(file) {
+  return new Promise((resolve, reject) => {
+    const el = document.createElement('video');
+    const url = URL.createObjectURL(file);
+    el.src = url; el.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px';
+    document.body.appendChild(el);
+
+    let rec, guard, metaGuard, speed = 1;
+    const chunks = [];
+    const cleanup = () => {
+      clearTimeout(guard); clearTimeout(metaGuard);
+      try { document.body.removeChild(el); } catch {}
+      URL.revokeObjectURL(url);
+    };
+    const fail = msg => {
+      if (rec && rec.state !== 'inactive') try { rec.stop(); } catch {}
+      cleanup(); reject(new Error(msg));
+    };
+
+    el.onerror = () => fail('media error');
+    metaGuard = setTimeout(() => fail('timed out'), 12000);
+
+    el.onloadedmetadata = () => {
+      clearTimeout(metaGuard);
+      try {
+        const mediaSrc = ac.createMediaElementSource(el);
+        const dst = ac.createMediaStreamDestination();
+        mediaSrc.connect(dst);
+        const mute = ac.createGain(); mute.gain.value = 0;
+        mediaSrc.connect(mute); mute.connect(ac.destination);
+
+        el.playbackRate = 8; speed = Math.max(1, el.playbackRate || 1);
+        const mime = ['audio/webm;codecs=opus','audio/webm','audio/ogg'].find(m => MediaRecorder.isTypeSupported(m)) || '';
+        rec = new MediaRecorder(dst.stream, mime ? {mimeType:mime} : {});
+        rec.ondataavailable = ev => { if(ev.data.size) chunks.push(ev.data); };
+        rec.onstop = () => {
+          cleanup();
+          const blob = new Blob(chunks, {type:mime||'audio/webm'});
+          blob.arrayBuffer().then(ab => ac.decodeAudioData(ab)).then(resolve).catch(()=>reject(new Error('decode failed')));
+        };
+        rec.start(200);
+        el.onended = () => { if(rec.state==='recording') rec.stop(); };
+        guard = setTimeout(() => { if(rec&&rec.state==='recording') rec.stop(); }, ((el.duration||600)/speed+15)*1000);
+        el.play().catch(err => fail(err.message));
+      } catch(err){fail(err.message);}
+    };
+    el.load();
+  });
+}
+
+function enable() {
+  const ok = !!audioBuf;
+  prvBtn.disabled = !ok; expBtn.disabled = !ok;
+  if(ok){setStatus('ready to preview or export.');updateHint();}
+}
+
+// ── Single-file Export Engine ───────────────────────────────────────────────
+async function renderSingleFile(buf) {
+  if (!window.MediaRecorder) throw new Error('Video export is not supported in this browser.');
+  if (typeof cv.captureStream !== 'function') throw new Error('Canvas recording is not supported in this browser.');
+
+  const prevBuf = audioBuf; audioBuf = buf; cachedNormGain = null;
+  const playRate = +$('spd').value * Math.pow(2, +$('pit').value/12);
+  const effectiveDuration = audioBuf.duration / playRate;
+
+  const streamDst = ac.createMediaStreamDestination();
+  const graphResult = buildGraph(streamDst, 0);
+  const fps = +$('fps').value;
+  const canvasStream = cv.captureStream(fps);
+  const mixed = new MediaStream([...canvasStream.getVideoTracks(), ...streamDst.stream.getAudioTracks()]);
+
+  // Prefer MP4, then use the broadly-supported WebM recorder path. Keeping the
+  // real container extension is essential; renaming WebM to MP4 corrupts it.
+  const candidates = [
+    'video/webm;codecs=vp8,opus',
+    'video/webm;codecs=vp9,opus',
+    'video/webm',
+    'video/mp4;codecs="avc1.42E01E,mp4a.40.2"',
+    'video/mp4',
+  ];
+  const mime = candidates.find(type => MediaRecorder.isTypeSupported(type));
+  if (!mime) {
+    mixed.getTracks().forEach(track => track.stop());
+    audioBuf = prevBuf;
+    throw new Error('This browser does not support video recording.');
+  }
+
+  let recorder;
+  const isIntermediateWebM = mime.includes('webm');
+  const options = {
+    mimeType: mime,
+    videoBitsPerSecond: Math.min(
+      +$('vb').value * 1_000_000,
+      isIntermediateWebM ? 8_000_000 : Number.POSITIVE_INFINITY
+    ),
+    audioBitsPerSecond: Math.min(
+      +$('ab').value * 1_000,
+      isIntermediateWebM ? 192_000 : Number.POSITIVE_INFINITY
+    ),
+  };
+  try {
+    recorder = new MediaRecorder(mixed, options);
+  } catch {
+    try {
+      recorder = new MediaRecorder(mixed, { mimeType: mime });
+    } catch (error) {
+      mixed.getTracks().forEach(track => track.stop());
+      try { graphResult.lfo.stop(); } catch {}
+      audioBuf = prevBuf;
+      throw error;
+    }
+  }
+  const actualMime = recorder.mimeType || mime;
+  const outputExtension = actualMime.includes('mp4') ? 'mp4' : 'webm';
+
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let frameRequest = 0, stopTimer = 0, safetyTimer = 0, settled = false;
+    const cleanup = () => {
+      cancelAnimationFrame(frameRequest);
+      clearTimeout(stopTimer);
+      clearTimeout(safetyTimer);
+      try { graphResult.src.stop(); } catch {}
+      try { graphResult.lfo.stop(); } catch {}
+      mixed.getTracks().forEach(track => track.stop());
+      audioBuf = prevBuf;
+    };
+    const fail = error => {
+      if (settled) return;
+      settled = true;
+      try { if (recorder.state !== 'inactive') recorder.stop(); } catch {}
+      cleanup();
+      reject(error instanceof Error ? error : new Error('Export failed.'));
+    };
+    const stopRecorder = () => {
+      if (recorder.state === 'recording') recorder.stop();
+    };
+
+    recorder.ondataavailable = ev => { if(ev.data.size) chunks.push(ev.data); };
+    recorder.onstop = () => {
+      if (settled) return;
+      settled = true;
+      const ext = outputExtension;
+      const blob = new Blob(chunks, { type: actualMime });
+      cleanup();
+      if (!blob.size) {
+        reject(new Error('The browser produced an empty recording.'));
+        return;
+      }
+      resolve({ blob, ext, duration: effectiveDuration });
+    };
+    recorder.onerror = event => fail(event.error || new Error('MediaRecorder failed.'));
+
+    const t0 = ac.currentTime;
+    graphResult.src.onended = () => { stopTimer = setTimeout(stopRecorder, 1400); };
+    try {
+      recorder.start(500);
+      graphResult.src.start(0);
+    } catch (error) {
+      fail(error);
+      return;
+    }
+    safetyTimer = setTimeout(stopRecorder, Math.ceil((effectiveDuration + 8) * 1000));
+    let lastProgress = -1;
+    const renderExportFrame = () => {
+      if (recorder.state === 'inactive') return;
+      const t = Math.max(0, ac.currentTime - t0);
+      drawFrame(t, true);
+      const progress = Math.min(99, Math.floor((t / effectiveDuration) * 100));
+      if (progress >= lastProgress + 2) {
+        lastProgress = progress;
+        expBtn.textContent = `exporting ${progress}%`;
+      }
+      frameRequest = requestAnimationFrame(renderExportFrame);
+    };
+    renderExportFrame();
+  });
+}
+
+expBtn.addEventListener('click', async () => {
+  if (recording || !audioBuf) return;
+  recording = true;
+  expBtn.disabled = true;
+  prvBtn.disabled = true;
+  expBtn.textContent = 'exporting…';
+  dlLink.style.display = 'none';
+  try {
+    if(!ac) ac = new(window.AudioContext||window.webkitAudioContext)();
+    await ac.resume();
+    stopPreview();
+    setStatus('rendering video…', 'act');
+    const recorded = await renderSingleFile(audioBuf);
+    let blob = recorded.blob;
+    let ext = recorded.ext;
+    if (ext !== 'mp4') {
+      if (!window.transcodeToMp4) throw new Error('MP4 converter failed to load.');
+      expBtn.textContent = 'loading MP4 converter…';
+      blob = await window.transcodeToMp4(blob, recorded.duration, progress => {
+        expBtn.textContent = `converting MP4 ${Math.round(progress * 100)}%`;
+      });
+      ext = 'mp4';
+    }
+    if (exportUrl) URL.revokeObjectURL(exportUrl);
+    exportUrl = URL.createObjectURL(blob);
+    const sourceName = queue[0]?.name || 'dreamdrift';
+    const baseName = sourceName.replace(/\.[^/.]+$/, '');
+    dlLink.href = exportUrl;
+    dlLink.download = baseName + '-dreamdrift.' + ext;
+    dlLink.textContent = 'download ' + dlLink.download;
+    dlLink.style.display = 'inline-flex';
+    setStatus('export ready for download.', 'done');
+    // The original export click is a user gesture; browsers permit this
+    // follow-up download while the visible link remains as a fallback.
+    dlLink.click();
+  } catch (error) {
+    console.error('Export failed', error);
+    setStatus(error.message || 'Export failed.', 'act');
+    expBtn.textContent = 'export failed — retry';
+    return;
+  } finally {
+    recording = false;
+    expBtn.disabled = false;
+    prvBtn.disabled = false;
+  }
+  expBtn.textContent = 'export current';
+});
+
+// Settings Persistence
+const LS_KEY = 'tape-room-v8';
+function saveSettings() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      spd:$('spd').value,pit:$('pit').value,tl:$('tl').value,rm:$('rm').value,
+      wt:$('wt').value,fltr:$('fltr').value,bs:$('bs').value,sw:$('sw').value,
+      dt:$('dt').value,df:$('df').value,dm:$('dm').value,
+      gr:$('gr').value,dmg:$('dmg').value,vh:$('vh').value,sc:$('sc').value,
+      ch:$('ch').value,vi:$('vi').value,fl:$('fl').value,sp:$('sp').value,
+      vb:$('vb').value,ab:$('ab').value,fps:$('fps').value,
+      res:$('res').value,ar:$('ar').value,color:colorPre,
+    }));
+  } catch {}
+}
+function loadSettings() {
+  try {
+    const s=JSON.parse(localStorage.getItem(LS_KEY)); if(!s) return;
+    const set=(id,val)=>{if(val!==undefined&&$(id))$(id).value=val;};
+    set('spd',s.spd);set('pit',s.pit);set('tl',s.tl);set('rm',s.rm);
+    set('wt',s.wt);set('fltr',s.fltr);set('bs',s.bs);set('sw',s.sw);
+    set('dt',s.dt);set('df',s.df);set('dm',s.dm);
+    set('gr',s.gr);set('dmg',s.dmg);set('vh',s.vh);set('sc',s.sc);
+    set('ch',s.ch);set('vi',s.vi);set('fl',s.fl);set('sp',s.sp);
+    set('vb',s.vb);set('ab',s.ab);set('fps',s.fps);
+    set('res',s.res);set('ar',s.ar);
+    if(s.color){colorPre=s.color;document.querySelectorAll('[data-vp]').forEach(b=>b.classList.toggle('on',b.dataset.vp===colorPre));}
+  } catch {}
+}
+
+
+// ── Initialization ──────────────────────────────────────────────────────────
+loadSettings();
+initDefaultImage();
+applyDims();
+refreshLabels();
+
+})();
+</script>
+<script type="module" src="/src/ffmpeg-export.ts"></script>
+<script>
+(()=>{const stars=document.getElementById('ambientStars');if(stars){const sf=document.createDocumentFragment();for(let i=0;i<34;i++){const star=document.createElement('i');star.style.left=`${4+(i*41.73)%92}%`;star.style.top=`${5+(i*27.41)%82}%`;star.style.setProperty('--twinkle',`${3.5+(i%6)*.7}s`);star.style.setProperty('--delay',`${-((i*.61)%4)}s`);if(i%9===0){star.style.width='2px';star.style.height='2px'}sf.appendChild(star)}stars.appendChild(sf)}const rain=document.getElementById('ambientRain');if(rain){const frag=document.createDocumentFragment();for(let i=0;i<54;i++){const drop=document.createElement('i');drop.style.left=`${(i*37.17)%108}%`;drop.style.setProperty('--speed',`${2.3+(i%8)*.34}s`);drop.style.setProperty('--delay',`${-((i*0.43)%5.4)}s`);drop.style.opacity=String(.2+(i%5)*.13);frag.appendChild(drop)}rain.appendChild(frag)}let tx=0,ty=0,cx=0,cy=0;addEventListener('pointermove',e=>{tx=(e.clientX/innerWidth-.5)*34;ty=(e.clientY/innerHeight-.5)*22},{passive:true});const tick=()=>{cx+=(tx-cx)*.045;cy+=(ty-cy)*.045;document.body.style.setProperty('--mx',cx.toFixed(2)+'px');document.body.style.setProperty('--my',cy.toFixed(2)+'px');requestAnimationFrame(tick)};if(!matchMedia('(prefers-reduced-motion: reduce)').matches)tick()})();
+</script></body>
+</html>
