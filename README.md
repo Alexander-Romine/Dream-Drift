@@ -1,6 +1,6 @@
 # Dream-Drift
 
-A browser studio that turns audio or video into an aesthetic clip: slowed-and-reverb presets, retro film filters, and in-browser video export.
+A browser studio that turns audio and video into an aesthetic slowed + reverb video.
 
 **Live site:** https://dream-drift.vercel.app
 
@@ -15,11 +15,11 @@ A browser studio that turns audio or video into an aesthetic clip: slowed-and-re
 - Visual effects: film grain, analog damage, VHS distortion, scanlines, chromatic aberration, vignette, CRT flicker and spectrum analyzer
 - Export at 16:9 or 9:16, up to 1440p and 60 fps, with adjustable video and audio bitrate
 - Preview with YouTube-style playback controls and fullscreen
-- Settings saved between visits
 
 ## Tech Stack
 
 - [Vite](https://vite.dev/)
+- HTML
 - TypeScript
 - [FFmpeg WASM](https://ffmpegwasm.netlify.app/) for in-browser export
 - Hosted on [Vercel](https://vercel.com)
